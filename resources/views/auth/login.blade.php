@@ -13,14 +13,14 @@
         @csrf
         <div class="form-group">
             <label for="email">Email</label>
-            <input type="email" name="email" class="form-control">
+            <input type="email" name="email" class="form-control" value="{{ old('email') }}" required>
         </div>
         <div class="form-group">
             <label for="password">{{__('auth.password')}}</label>
             <input type="password" name="password" class="form-control">
-            <a href="{{ route('password.request') }}" class="text-small">
+            {{-- <a href="{{ route('forgot-password') }}" class="text-small">
                 {{__('auth.forgot password')}}?
-            </a>
+            </a> --}}
         </div>
         <button type="submit" class="btn btn-primary">{{__('auth.login')}}</button>
     </form>

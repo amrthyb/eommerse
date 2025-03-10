@@ -50,7 +50,7 @@ Route::get('/export/order', [OrderController::class, 'export'])->name('export.or
 
 Route::get('settings', [AuthenticationController::class, 'settingView'])->name('settings.index');
 Route::post('settings/email', [AuthenticationController::class, 'emailChange'])->name('settings.store');
-
+Route::post('update-account',[AuthenticationController::class,'updateAccount'])->name('update-account');
 
 Route::get('/greeting/{locale}', function (string $locale) {
     if (! in_array($locale, ['en', 'id'])) {

@@ -27,27 +27,6 @@
 </div>
 @endif
 
-@php
-    // Data dummy untuk kategori
-    $dummyCategories = [
-        (object)[
-            'id' => 1,
-            'name' => 'Kategori A',
-            'description' => 'Deskripsi untuk Kategori A'
-        ],
-        (object)[
-            'id' => 2,
-            'name' => 'Kategori B',
-            'description' => 'Deskripsi untuk Kategori B'
-        ],
-        (object)[
-            'id' => 3,
-            'name' => 'Kategori C',
-            'description' => 'Deskripsi untuk Kategori C'
-        ],
-    ];
-@endphp
-
 <table id="categoriesTable" class="table table-striped" style="width:100%">
     <thead>
         <tr>
@@ -58,7 +37,7 @@
         </tr>
     </thead>
     <tbody>
-        @foreach($dummyCategories as $category)
+        @foreach($categories as $category)
             <tr>
                 <td>{{ $category->id }}</td>
                 <td>{{ $category->name }}</td>

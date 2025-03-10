@@ -13,5 +13,5 @@ return [
     'create category' => 'Buat Kategori',
     'edit category' => 'Ubah Kategori',
     'update category' => 'Perbarui Kategori',
-
+    'status'=>'Status',
 ];

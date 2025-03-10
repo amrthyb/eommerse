@@ -21,12 +21,12 @@
     <form action="" method="POST" enctype="multipart/form-data">
         @csrf
         @method('PUT')
-        
+
         <div class="form-group">
             <label for="name">{{__('admin.name')}}</label>
             <input type="text" name="name" class="form-control" value="" required>
         </div>
-        
+
         <button type="submit" class="btn btn-primary mt-3">{{__('admin.update role')}}</button>
     </form>
 @endsection

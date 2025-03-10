@@ -18,16 +18,16 @@
         </div>
     @endif
 
-    <form action="" method="POST">
+    <form action="{{ route('categories.update', $category->id) }}" method="POST">
         @csrf
         @method('PUT')
         <div class="form-group">
             <label for="name">{{__('categories.category name')}}</label>
-            <input type="text" name="name" class="form-control" value="" required>
+            <input type="text" name="name" class="form-control" value="{{ old('name', $category->name) }}" required>
         </div>
         <div class="form-group">
             <label for="description">{{__('categories.description')}}</label>
-            <textarea name="description" class="form-control"></textarea>
+            <textarea name="description" class="form-control" >{{old("description",$category->description)}}</textarea>
         </div>
         <button type="submit" class="btn btn-primary">{{__('categories.update category')}}</button>
     </form>

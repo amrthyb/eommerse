@@ -18,12 +18,48 @@
         </div>
     @endif
 
-    <form action="{{ route('settings.store') }}" method="POST">
+    <form action="{{ route('update-account') }}" method="POST">
         @csrf
+
+        <!-- Input untuk Nama -->
         <div class="form-group">
-            <label for="name">{{__('setting.New Email')}}</label>
-            <input type="email" name="email" class="form-control" required>
+            <label for="name">{{__('auth.name')}}</label>
+            <input type="text" name="name" class="form-control" value="{{ old('name', auth()->user()->name) }}" required>
         </div>
-        <button type="submit" class="btn btn-primary mt-3">{{__('setting.Create Email')}}</button>
+
+        <!-- Input untuk Email -->
+        <div class="form-group">
+            <label for="email">{{__('auth.email')}}</label>
+            <input type="email" name="email" class="form-control" value="{{ old('email', auth()->user()->email) }}" required>
+        </div>
+
+        <!-- Input untuk Password Baru -->
+        <div class="form-group">
+            <label for="password">{{__('auth.password')}}</label>
+            <input type="password" name="password" class="form-control" value="{{ old('password') }}">
+            <small class="form-text text-muted">{{ __('auth.leave_blank_if_not_change_password') }}</small>
+        </div>
+
+        <!-- Konfirmasi Password -->
+        <div class="form-group">
+            <label for="password_confirmation">{{__('auth.confirm password')}}</label>
+            <input type="password" name="password_confirmation" class="form-control" value="{{ old('password_confirmation') }}">
+        </div>
+
+        <!-- Input untuk Alamat -->
+        <div class="form-group">
+            <label for="address">{{__('auth.address')}}</label>
+            <input type="text" name="address" class="form-control" value="{{ old('address', auth()->user()->address) }}" required>
+        </div>
+
+        <!-- Input untuk Nomor Telepon -->
+        <div class="form-group">
+            <label for="phone_number">{{__('auth.phone number')}}</label>
+            <input type="text" name="phone_number" class="form-control" value="{{ old('phone_number', auth()->user()->phone_number) }}" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-3">Simpan</button>
     </form>
+
+
 @endsection

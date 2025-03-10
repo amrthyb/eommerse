@@ -1,0 +1,31 @@
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use App\Models\Category;
+
+class CategoriesTableSeeder extends Seeder
+{
+    public function run()
+    {
+        Category::create([
+            'name' => 'Electronics',
+            'slug' => 'electronics',
+            'description' => 'Gadgets, devices, and tech products.',
+            'status' => 'active',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        Category::create([
+            'name' => 'Clothing',
+            'slug' => 'clothing',
+            'description' => 'Apparel and fashion items.',
+            'status' => 'active',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+    }
+}
+

@@ -15,7 +15,9 @@ class CategoryController extends Controller
 {
     public function index()
     {
-        return view('admin.categories.index');
+        // $query dari db
+        $categories = Category::orderBy('id','asc')->get();
+        return view('admin.categories.index',['categories'=>$categories]);
     }
 
     public function create()
@@ -23,23 +25,57 @@ class CategoryController extends Controller
         return view('admin.categories.create');
     }
 
-    public function store()
+    public function store(Request $request)
     {
-        
+         //validate form
+         $this->validate($request, [
+            'name'     => 'required|max:225',
+            'description'=> 'required|max:225',
+            'status'     => 'required|max:225',
+        ]);
+        // dd($request->all());
+        //create post
+        Category::create([
+            'name'     => $request->name,
+            'slug'=> str_replace(' ','-',$request->name),
+            'description'   => $request->description,
+            'status'   => 'active',
+        ]);
+
+        //redirect to index
+        return redirect()->route('categories.index')->with(['success' => 'Data Berhasil Disimpan!']);
     }
 
-    public function edit()
+
+    public function edit($id)
     {
-        return view('admin.categories.edit');
+        $category = Category::find($id);
+        return view('admin.categories.edit',['category' => $category]);
     }
 
-    public function update()
+    public function update(Request $request, $id)
     {
-        
+        $this->validate($request, [
+            'name'     => 'required|max:225',
+            'description'=> 'required|max:225',
+            'status'     => 'required|max:225',
+        ]);
+        $categories = Category::findOrFail($id);
+        // dd($request->all());
+        //create post
+        Category::update([
+            'name'     => $request->name,
+            'slug'=> str_replace(' ','-',$request->name),
+            'description'   => $request->description,
+            'status'   => 'active',
+        ]);
+
+        //redirect to index
+        return redirect()->route('posts.index')->with(['success' => 'Data Berhasil Diubah!']);
     }
 
     public function destroy()
     {
-        
-    }
 }
+}
+
