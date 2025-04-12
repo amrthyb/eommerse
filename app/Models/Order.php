@@ -10,7 +10,7 @@ class Order extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id', 'order_date', 'total_amount', 'shipping_address'
+        'user_id', 'status', 'total_amount', 'price', 'shipping_address'
     ];
 
     // Relasi ke tabel user
@@ -19,8 +19,8 @@ class Order extends Model
         return $this->belongsTo(User::class);
     }
 
-    // Relasi ke tabel order_items
-    public function orderItems()
+    // Relasi dengan model OrderItem
+    public function Items()
     {
         return $this->hasMany(OrderItem::class);
     }

@@ -3,22 +3,36 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
-use App\Models\OrderItem;
-use Illuminate\Http\Request;
-use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\OrderExport;
-use PDF;
-use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Models\User;
+use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
     public function index()
     {
-        return view('admin.orders.index');
+        // Ambil pesanan yang hanya dimiliki oleh user dengan role 'user'
+        $orders = Order::with('user')
+                        ->whereHas('user', function($query) {
+                            $query->where('role', 'user');
+                        })
+                        ->get();
+
+        return view('admin.orders.index', compact('orders'));
     }
 
     public function show($id)
     {
-        return view('admin.orders.show');
+        // Ambil pesanan berdasarkan ID
+        $order = Order::with('items')
+                      ->findOrFail($id);
+
+        return view('admin.orders.show', compact('order'));
+    }
+    public function export()
+    {
+        // Menyediakan opsi untuk mengekspor data
+        return Excel::download(new OrderExport, 'orders.xlsx');
     }
 }

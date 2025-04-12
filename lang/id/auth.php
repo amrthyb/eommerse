@@ -21,5 +21,6 @@ return [
     'confirm password' => 'Konfirmasi Kata Sandi',
     'address' => 'Alamat',
     'phone number' => 'Nomor HP',
+    'email' => 'Email',
 
 ];

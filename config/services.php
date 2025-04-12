@@ -36,7 +36,8 @@ return [
     ],
 
     'midtrans' => [
-        'server_key' => env('MIDTRANS_SERVER_KEY'),
-        'is_production' => false,
+        'server_key' => env('MIDTRANS_SERVER_KEY'),  // Mengambil MIDTRANS_SERVER_KEY dari .env
+        'client_key' => env('MIDTRANS_CLIENT_KEY'),  // Mengambil MIDTRANS_CLIENT_KEY dari .env
+        'is_production' => env('MIDTRANS_IS_PRODUCTION', false),  // Mengambil MIDTRANS_IS_PRODUCTION dari .env
     ],
 ];

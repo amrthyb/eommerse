@@ -10,14 +10,15 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\CategoryExport;
 use App\Imports\CategoryImport;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class CategoryController extends Controller
 {
     public function index()
     {
         // $query dari db
-        $categories = Category::orderBy('id','asc')->get();
-        return view('admin.categories.index',['categories'=>$categories]);
+        $categories = Category::orderBy('id', 'asc')->get();
+        return view('admin.categories.index', ['categories' => $categories]);
     }
 
     public function create()
@@ -27,55 +28,89 @@ class CategoryController extends Controller
 
     public function store(Request $request)
     {
-         //validate form
-         $this->validate($request, [
-            'name'     => 'required|max:225',
-            'description'=> 'required|max:225',
-            'status'     => 'required|max:225',
+        //validate form
+        $this->validate($request, [
+            'name' => 'required|max:225',
+            'description' => 'required|max:225',
+            // 'status'     => 'required|max:225',
         ]);
         // dd($request->all());
         //create post
         Category::create([
-            'name'     => $request->name,
-            'slug'=> str_replace(' ','-',$request->name),
-            'description'   => $request->description,
-            'status'   => 'active',
+            'name' => $request->name,
+            'description' => $request->description,
+            // 'status'   => 'active',
         ]);
 
         //redirect to index
-        return redirect()->route('categories.index')->with(['success' => 'Data Berhasil Disimpan!']);
+        return redirect()
+            ->route('categories.index')
+            ->with(['success' => 'Data Berhasil Disimpan!']);
     }
-
 
     public function edit($id)
     {
         $category = Category::find($id);
-        return view('admin.categories.edit',['category' => $category]);
+        return view('admin.categories.edit', ['category' => $category]);
     }
 
     public function update(Request $request, $id)
     {
+        // Validasi input
         $this->validate($request, [
-            'name'     => 'required|max:225',
-            'description'=> 'required|max:225',
-            'status'     => 'required|max:225',
-        ]);
-        $categories = Category::findOrFail($id);
-        // dd($request->all());
-        //create post
-        Category::update([
-            'name'     => $request->name,
-            'slug'=> str_replace(' ','-',$request->name),
-            'description'   => $request->description,
-            'status'   => 'active',
+            'name' => 'required|max:225',
+            'description' => 'required|max:225',
+            // 'status' => 'required|max:225',
         ]);
 
-        //redirect to index
-        return redirect()->route('posts.index')->with(['success' => 'Data Berhasil Diubah!']);
+        // Menemukan dan update kategori berdasarkan ID
+        $category = Category::findOrFail($id);
+        $category->update([
+            'name' => $request->name,
+            'description' => $request->description,
+            // 'status' => 'active',
+        ]);
+
+        // Redirect ke halaman index dengan pesan sukses
+        return redirect()
+            ->route('categories.index')
+            ->with(['success' => 'Data Berhasil Diubah!']);
     }
 
-    public function destroy()
+    public function destroy($id)
     {
-}
-}
+        $category = Category::find($id);
 
+        if ($category) {
+            $category->delete();
+            return redirect()->route('categories.index')->with('success', 'Category deleted successfully.');
+        }
+
+        return redirect()->route('categories.index')->with('error', 'Category not found.');
+    }
+
+    // Import Categories
+    public function import(Request $request)
+    {
+        $this->validate($request, [
+            'file' => 'required|mimes:csv,xls,xlsx',
+        ]);
+
+        try {
+            Excel::import(new CategoryImport(), $request->file('file'));
+
+            return redirect()
+                ->route('categories.index')
+                ->with(['success' => 'Data Berhasil Diimport!']);
+        } catch (\Exception $e) {
+            return redirect()
+                ->route('categories.index')
+                ->with(['error' => 'Data Gagal Diimport! ' . $e->getMessage()]);
+        }
+    }
+
+    public function export()
+    {
+        return Excel::download(new CategoryExport(), 'categories.xlsx');
+    }
+}

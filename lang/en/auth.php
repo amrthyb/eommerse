@@ -21,5 +21,6 @@ return [
     'confirm password' => 'Confirm Password',
     'address' => 'Address',
     'phone number' => 'Phone Number',
+    'email' => 'Email', 
 
 ];

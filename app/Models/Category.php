@@ -9,7 +9,7 @@ class Category extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name', 'slug', 'description', 'status'
+        'name', 'description', 'status'
     ];
 
     // Relasi ke tabel products

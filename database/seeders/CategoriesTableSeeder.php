@@ -11,7 +11,6 @@ class CategoriesTableSeeder extends Seeder
     {
         Category::create([
             'name' => 'Electronics',
-            'slug' => 'electronics',
             'description' => 'Gadgets, devices, and tech products.',
             'status' => 'active',
             'created_at' => now(),
@@ -20,7 +19,6 @@ class CategoriesTableSeeder extends Seeder
 
         Category::create([
             'name' => 'Clothing',
-            'slug' => 'clothing',
             'description' => 'Apparel and fashion items.',
             'status' => 'active',
             'created_at' => now(),

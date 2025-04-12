@@ -10,5 +10,6 @@ return [
     'user' => 'User',
     'total price' => 'Total Price',
     'created at' => 'Created At',
+    'status' => 'Status',
 
 ];

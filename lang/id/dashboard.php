@@ -10,5 +10,5 @@ return [
     'user' => 'Pengguna',
     'total price' => 'Total Harga',
     'created at' => 'Pesanan Dibuat',
-
+    'status'=> 'Status',
 ];

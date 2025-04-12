@@ -3,29 +3,10 @@
 @section('content')
     <h2 class="mt-3">{{__('order.list orders')}}</h2>
 
-    @php
-        // Data dummy untuk orders
-        $dummyOrders = [
-            (object)[
-                'id' => 101,
-                'user' => (object)['name' => 'John Doe'],
-                'total_price' => 250000,
-                'status' => 'completed'
-            ],
-            (object)[
-                'id' => 102,
-                'user' => (object)['name' => 'Jane Smith'],
-                'total_price' => 150000,
-                'status' => 'pending'
-            ],
-            (object)[
-                'id' => 103,
-                'user' => (object)['name' => 'Alice Johnson'],
-                'total_price' => 300000,
-                'status' => 'cancelled'
-            ],
-        ];
-    @endphp
+    <div class="button-action" style="margin-bottom: 20px">
+        <!-- Tombol untuk ekspor -->
+        <a href="{{ route('orders.export') }}" class="btn btn-success">Export</a>
+    </div>
 
     <table id="table" class="table table-striped" style="width:100%">
         <thead>
@@ -38,11 +19,11 @@
             </tr>
         </thead>
         <tbody>
-            @foreach($dummyOrders as $order)
+            @foreach($orders as $order)
                 <tr>
                     <td>{{ $order->id }}</td>
                     <td>{{ $order->user->name }}</td>
-                    <td>Rp {{ number_format($order->total_price, 0, ',', '.') }}</td>
+                    <td>Rp {{ number_format($order->total_amount, 0, ',', '.') }}</td>
                     <td>{{ ucfirst($order->status) }}</td>
                     <td>
                         <a href="{{ route('orders.show', $order->id) }}" class="btn btn-info">View</a>

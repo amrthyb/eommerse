@@ -33,18 +33,16 @@ class AuthenticationController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => 'user',
+            'role' => 'admin',
             'address' => $request->address,
             'phone_number' => $request->phone_number,
         ]);
 
         Auth::login($user);
 
-        // Redirect ke halaman dashboard sesuai dengan role
+        // cek apakah role admin?
         if ($user->role == 'admin') {
             return redirect('dashboard')->with('success', 'Registration successful. Welcome to the admin dashboard.');
-        } elseif ($user->role == 'user') {
-            return redirect('dashboard')->with('success', 'Registration successful. Welcome to your dashboard.');
         }
 
         // Jika tidak ada role yang sesuai, arahkan ke halaman default
@@ -58,33 +56,34 @@ class AuthenticationController extends Controller
 
     public function login(Request $request)
     {
-        // hal yang terpelukan apa dulu ? username & password
-        // gimana dapatin username sama password.
-        // setelah dapat mau ngapain ? bener atau salah password / username,e ? redirect dashboard ? home ? profile ?
-        // Validasi form login
-        $validated = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
 
-        // Cek false or true
-        $user = User::where('email', $request->email)->first();
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            return back()->withErrors(['email' => 'The provided credentials are incorrect.'])->withInput();
-        }
+    // Validasi form login
+    $validated = $request->validate([
+        'email' => 'required|email',
+        'password' => 'required',
+    ]);
 
-        // Jika validasi berhasil Login ke aplikasi
-        Auth::login($user);
+    // Cek apakah email dan password valid
+    $user = User::where('email', $request->email)->first();
 
-        // Cek role admin & user
-        if ($user->role == 'admin') {
-            return redirect('dashboard')->with('success', 'Login as admin successful.');
-        } elseif ($user->role == 'user') {
-            return redirect('dashboard')->with('success', 'Login as user successful.');
-        }
-
-        return redirect('/home');
+    // Jika user tidak ada atau password salah
+    if (!$user || !Hash::check($request->password, $user->password)) {
+        return back()->withErrors(['email' => 'The provided credentials are incorrect.'])->withInput();
     }
+
+    // Setelah login berhasil, periksa apakah user adalah admin
+    if ($user->role !== 'admin') {
+        Auth::logout();
+        return back()->withErrors(['email' => 'You do not have admin privileges.'])->withInput();
+    }
+
+    // Jika user adalah admin, lanjutkan login
+    Auth::login($user);
+
+    // Arahkan ke dashboard admin setelah berhasil login
+    return redirect('dashboard')->with('success', 'Login as admin successful.');
+}
+
 
     public function logout(Request $request)
     {

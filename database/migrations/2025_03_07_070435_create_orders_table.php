@@ -5,7 +5,6 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
 
-
 class CreateOrdersTable extends Migration
 {
     public function up()
@@ -14,6 +13,7 @@ class CreateOrdersTable extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->timestamp('order_date')->default(DB::raw('CURRENT_TIMESTAMP'));
+            $table->enum('status', ['pending', 'completed', 'canceled'])->default('pending');
             $table->decimal('total_amount', 10, 2);
             $table->text('shipping_address');
             $table->timestamps();
@@ -25,3 +25,4 @@ class CreateOrdersTable extends Migration
         Schema::dropIfExists('orders');
     }
 }
+

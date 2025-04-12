@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Models\Order;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -15,7 +16,7 @@ class NewOrder extends Notification
     /**
      * Create a new notification instance.
      */
-    public function __construct($order, $ccEmails = [])
+    public function __construct(Order $order, $ccEmails = [])
     {
         $this->order = $order;
         $this->ccEmails = $ccEmails;
@@ -28,7 +29,7 @@ class NewOrder extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['mail', 'database'];
+        return ['database'];
     }
 
     /**
@@ -36,7 +37,7 @@ class NewOrder extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
-        $mail = (new MailMessage)
+        $mail = (new MailMessage())
             ->subject('New Order Received')
             ->line('A new order has been placed.')
             ->action('View Order', url('/orders/' . $this->order->id))
@@ -46,7 +47,7 @@ class NewOrder extends Notification
         if (!empty($this->ccEmails)) {
             $mail->cc($this->ccEmails);
         }
-    
+
         return $mail;
     }
 
@@ -61,5 +62,10 @@ class NewOrder extends Notification
             'message' => 'New order received: Order #' . $this->order->id,
             'order_id' => $this->order->id,
         ];
+    }
+
+    public function databaseType(object $notifiable): string
+    {
+        return 'new order';
     }
 }

@@ -13,6 +13,7 @@
     <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css"> -->
 </head>
 <body>
+
     <div class="container-fluid">
         <div class="row">
             @include('partials.navbar')
@@ -87,11 +88,11 @@
     <script src="https://cdn.datatables.net/2.1.7/js/dataTables.bootstrap5.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
     <!-- <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script> -->
-    
+
     <script>
         var locale = "{{ App::getLocale() }}";
-        var languageUrl = locale === 'id' 
-        ? "{{asset('assets/indonesia.json')}}" 
+        var languageUrl = locale === 'id'
+        ? "{{asset('assets/indonesia.json')}}"
         : "{{asset('assets/english.json')}}" ;
 
         document.getElementById('notification-btn').addEventListener('click', function () {

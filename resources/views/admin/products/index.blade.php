@@ -1,75 +1,120 @@
 @extends('layouts.admin')
 
 @section('content')
-<h2 class="mt-3">{{__('product.products')}}</h2>
+    <h2 class="mt-3">{{ __('product.products') }}</h2>
 
-<a href="{{ route('products.create') }}" class="btn btn-primary mb-3">{{__('product.add')}}</a>
+    <div class="button-action" style="margin-bottom: 20px">
+        <a href="{{ route('products.create') }}" class="btn btn-primary mb-md">{{ __('product.add') }}</a>
 
-@if (session('success'))
-<div class="alert alert-success">
-    {{ session('success') }}
-</div>
-@endif
+        <!-- Tombol Import (warna biru) -->
+        <button type="button" class="btn btn-info" data-toggle="modal" data-target="#import">
+            IMPORT
+        </button>
 
-@php
-    // Data dummy untuk produk
-    $dummyProducts = [
-        (object)[
-            'id' => 1,
-            'name' => 'Produk A',
-            'description' => 'Deskripsi untuk Produk A',
-            'price' => 100000,
-            'stock' => 10,
-            'images' => 'produk-a.jpg'
-        ],
-        (object)[
-            'id' => 2,
-            'name' => 'Produk B',
-            'description' => 'Deskripsi untuk Produk B',
-            'price' => 150000,
-            'stock' => 5,
-            'images' => 'produk-b.jpg'
-        ],
-        (object)[
-            'id' => 3,
-            'name' => 'Produk C',
-            'description' => 'Deskripsi untuk Produk C',
-            'price' => 200000,
-            'stock' => 8,
-            'images' => 'produk-c.jpg'
-        ],
-    ];
-@endphp
+        <!-- Tombol Export (warna hijau) -->
+        <form action="{{ route('products.export') }}" method="POST" style="display:inline-block;">
+            @csrf
+            <button type="submit" class="btn btn-success">EXPORT</button>
+        </form>
+    </div>
 
-<table id="productTable" class="table table-striped" style="width:100%">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>{{ __('product.name') }}</th>
-            <th>{{ __('product.description') }}</th>
-            <th>{{ __('product.price') }}</th>
-            <th>{{ __('product.stock') }}</th>
-            <th>{{ __('product.images') }}</th>
-            <th>{{ __('product.actions') }}</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach($dummyProducts as $product)
+
+    @if (session('error'))
+        <div class="alert alert-danger">
+            {{ session('error') }}
+        </div>
+    @endif
+
+    @if ($errors->any())
+        <div class="alert alert-danger">
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    @if (session('success'))
+        <div class="alert alert-success">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    <table id="productTable" class="table table-striped" style="width:100%">
+        <thead>
             <tr>
-                <td>{{ $product->id }}</td>
-                <td>{{ $product->name }}</td>
-                <td>{{ $product->description }}</td>
-                <td>Rp {{ number_format($product->price, 0, ',', '.') }}</td>
-                <td>{{ $product->stock }}</td>
-                <td>
-                    <img src="{{ asset('images/' . $product->images) }}" alt="{{ $product->name }}" width="50">
-                </td>
-                <td>
-                    <a href="{{ route('products.edit', 1) }}" class="btn btn-sm btn-primary">Edit</a>
-                    <a href="#" class="btn btn-sm btn-danger">Delete</a>
-                </td>
+                <th>ID</th>
+                <th>{{ __('product.name') }}</th>
+                <th>{{ __('product.description') }}</th>
+                <th>{{ __('product.price') }}</th>
+                <th>{{ __('product.stock') }}</th>
+                <th>{{ __('product.images') }}</th>
+                <th>{{ __('product.actions') }}</th>
             </tr>
-        @endforeach
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach ($products as $product)
+                <tr>
+                    <td>{{ $loop->iteration }}</td>
+                    <td>{{ $product->name }}</td>
+                    <td>{{ $product->description }}</td>
+                    <td>Rp {{ number_format($product->price, 0, ',', '.') }}</td>
+                    <td>{{ $product->stock }}</td>
+                    <td>
+                        @if ($product->images->isNotEmpty())
+                            <img src="{{ asset('storage/' . $product->images->first()->image_url) }}"
+                                alt="{{ $product->name }}" width="50">
+                        @else
+                            <p>No Image</p>
+                        @endif
+                    </td>
+                    <td>
+                        <a href="{{ route('products.edit', $product->id) }}" class="btn btn-sm btn-primary">Edit</a>
+                        <form action="{{ route('products.destroy', $product->id) }}" method="POST"
+                            style="display:inline;">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-sm btn-danger"
+                                onclick="return confirm('Apakah Anda yakin ingin menghapus produk ini?')">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
+
+    <!-- Modal untuk Import Produk -->
+    <div class="modal fade" id="import" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">IMPORT DATA</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form action="{{ route('products.import') }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label>PILIH FILE (CSV, XLS, XLSX)</label>
+                            <input type="file" name="file" class="form-control" accept=".xlsx, .xls, .csv" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">TUTUP</button>
+                        <button type="submit" class="btn btn-success">IMPORT</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include jQuery, Bootstrap, and DataTables JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+
+
 @endsection

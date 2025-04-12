@@ -11,6 +11,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class User extends Authenticatable
 {
+    // iki trait
+    // nah trait iki jerone wes akeh fungsi
     use HasApiTokens, HasFactory, Notifiable;
 
     /**
@@ -40,5 +42,10 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
     }
 }

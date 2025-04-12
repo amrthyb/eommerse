@@ -11,7 +11,6 @@ class ProductsTableSeeder extends Seeder
     {
         Product::create([
             'name' => 'Laptop',
-            'slug' => 'laptop',
             'description' => 'A powerful laptop for work and play.',
             'price' => 10000000.00,
             'stock' => 50,
@@ -22,7 +21,6 @@ class ProductsTableSeeder extends Seeder
 
         Product::create([
             'name' => 'T-shirt',
-            'slug' => 't-shirt',
             'description' => 'Comfortable cotton t-shirt.',
             'price' => 150000.00,
             'stock' => 100,
