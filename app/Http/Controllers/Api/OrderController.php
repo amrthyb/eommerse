@@ -95,12 +95,11 @@ class OrderController extends Controller
 
             $order->total_amount = $totalAmount;
             $order->save();
-
             // Kirim notifikasi ke user & admin
-            $user->notify(new NewOrder($order));
             $admins = User::where('role','admin')->get();
             foreach($admins as $admin){
-                $admin->notify(new NewOrder($order,$user));
+                // sementara no cc email
+                $admin->notify(new NewOrder($order,));
             }
 
             // Hapus item dari keranjang

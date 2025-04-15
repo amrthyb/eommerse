@@ -62,14 +62,12 @@ class ProductController extends Controller
             ]);
         }
     }
-       // Kirim notifikasi ke pengguna yang menambahkan produk (Auth::user()) dan semua admin
-       $user = Auth::user(); // Ambil pengguna yang sedang login
-       $user->notify(new NewProduct($product)); // Kirim notifikasi ke user
 
        // Mengirim notifikasi ke semua admin
-       $admins = User::where('role', 'admin')->get();
-       foreach ($admins as $admin) {
-           $admin->notify(new NewProduct($product)); // Kirim notifikasi ke admin
+       $users = User::where('role', 'user')->get();
+       foreach ($users as $user) {
+            sleep(2);
+           $user->notify(new NewProduct($product)); // Kirim notifikasi ke admin
        }
         // Redirect ke halaman index produk dengan pesan sukses
         return redirect()->route('products.index')->with('success', 'Produk berhasil dibuat!');

@@ -41,7 +41,7 @@
                         <!-- Badge Notifikasi -->
                         <span id="unreadNotificationBadge"
                             class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                            style="display: none;">
+                        >
                             0
                         </span>
                     </a>
@@ -56,7 +56,7 @@
         document.addEventListener('DOMContentLoaded', function () {
             // Fungsi untuk mengambil jumlah notifikasi yang belum dibaca
             function updateUnreadNotificationCount() {
-                fetch('{{ route('notifications.unreadCount') }}')
+                fetch(`{{ route('notifications.unreadCount') }}`)
                     .then(response => response.json())
                     .then(data => {
                         const badge = document.getElementById('unreadNotificationBadge');

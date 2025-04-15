@@ -29,7 +29,7 @@ class NewOrder extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return ['mail','database'];
     }
 
     /**
@@ -64,8 +64,4 @@ class NewOrder extends Notification
         ];
     }
 
-    public function databaseType(object $notifiable): string
-    {
-        return 'new order';
-    }
 }

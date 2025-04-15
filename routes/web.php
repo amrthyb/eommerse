@@ -71,11 +71,12 @@ Route::get('/greeting/{locale}', function (string $locale) {
 Route::post('/logout', [AuthenticationController::class, 'logout'])->name('logout');
 
 // Route untuk menandai notifikasi sebagai dibaca
-Route::get('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
+Route::post('/notifications/mark-as-read/{id}', [NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
 
 
 // Menampilkan daftar notifikasi
 Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount'])->name('notifications.unreadCount');
 
 // Menampilkan detail notifikasi dan menandainya sebagai sudah dibaca
 Route::get('/notifications/{id}', [NotificationController::class, 'show'])->name('notifications.show');
@@ -83,6 +84,5 @@ Route::get('/notifications/{id}', [NotificationController::class, 'show'])->name
 // Menghapus notifikasi
 Route::delete('/notifications/{id}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
 // web.php
-Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount'])->name('notifications.unreadCount');
 
 

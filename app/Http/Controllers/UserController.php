@@ -29,10 +29,10 @@ class UserController extends Controller
         $user = User::findOrFail($id);
         $orders = Order::where('user_id', $id)->orderBy('id')->get();
         // dd($orders);
-
+        
         return view('admin.users.show', compact('user', 'orders'));
     }
-    
+
     public function export()
     {
         // Menyimpan export ke dalam file Excel dengan nama 'users.xlsx'

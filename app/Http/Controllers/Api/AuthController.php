@@ -35,9 +35,9 @@ class AuthController extends Controller
             'password' => hash::make($request->password),
         ]);
         // Kirim notifikasi ke user & admin
-        $user->notify(new NewUserRegistered($user));
         $admins = User::where('role', 'admin')->get();
         foreach ($admins as $admin) {
+            sleep(2);
             $admin->notify(new NewUserRegistered($user));
         }
         return response()->json(

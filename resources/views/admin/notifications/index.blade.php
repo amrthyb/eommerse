@@ -22,61 +22,56 @@
     @endif
 
     @if ($notifications->count())
-    <ul class="list-group">
-        @foreach ($notifications as $notification)
-            <li class="list-group-item d-flex justify-content-between align-items-center notification-item
-                {{ is_null($notification->read_at) ? 'bg-light border-left-primary' : '' }}"
-                data-id="{{ $notification->id }}"
-                style="cursor: pointer;">
+        <ul class="list-group">
+            @foreach ($notifications as $notification)
+            @php
+                $type = class_basename($notification->type);
+                $isUnread = is_null($notification->read_at);
+            @endphp
 
-                <div class="flex-grow-1">
-                    @if ($notification->type === 'App\Notifications\NewUserRegistered')
-                        <strong>Pengguna Baru Didaftarkan:</strong>
-                        {{ $notification->data['name'] }} baru saja mendaftar.
+            <li class="list-group-item d-flex justify-content-between align-items-center {{ $isUnread ? 'bg-info text-dark fw-bold' : 'bg-light text-muted' }}">
+                <div class="w-100 d-flex justify-content-between align-items-center">
+                    <div>
+                        @if ($type === 'NewUserRegistered')
+                            New user registered: {{ $notification->data['name'] ?? 'Unknown User' }}
+                            <button
+                               class="btn btn-sm mark-as-read {{ $isUnread ? 'btn-secondary' : 'btn-outline-secondary' }}"
+                               data-id="{{ $notification->id }}"
+                               data-url="{{ route('users.show', $notification->data['user_id']) }}">
+                               View
+                    </button>
 
-                    @elseif ($notification->type === 'App\Notifications\NewOrder')
-                        <strong>Pesanan Baru:</strong>
-                        Pesanan #{{ $notification->data['order_id'] }} telah dibuat.
+                        @elseif ($type === 'OrderStatusChanged')
+                            Order #{{ $notification->data['order_id'] ?? 'Unknown Order' }} status changed to {{ $notification->data['status'] ?? 'Unknown Status' }}
+                            <button
+                               class="btn btn-sm mark-as-read {{ $isUnread ? 'btn-secondary' : 'btn-outline-secondary' }}"
+                               data-id="{{ $notification->id }}"
+                               data-url="{{ route('orders.show', $notification->data['order_id']) }}">
+                               View
+                </button>
 
-                    @elseif ($notification->type === 'App\Notifications\OrderStatusChanged')
-                        <strong>Status Pesanan Diubah:</strong>
-                        Pesanan #{{ $notification->data['order_id'] }} sekarang berstatus
-                        <strong>{{ $notification->data['status'] }}</strong>.
+                        @elseif ($type === 'NewOrder')
+                            Order baru: Order #{{ $notification->data['order_id'] ?? 'Unknown Order' }}
+                            <button
+                               class="btn btn-sm mark-as-read {{ $isUnread ? 'btn-secondary' : 'btn-outline-secondary' }}"
+                               data-id="{{ $notification->id }}"
+                               data-url="{{ route('orders.show', $notification->data['order_id']) }}">
+                               View
+            </button>
 
-                    @elseif ($notification->type === 'App\Notifications\NewProduct')
-                        <strong>Produk Baru:</strong>
-                        {{ $notification->data['product_name'] ?? '[Nama Produk Tidak Tersedia]' }}
+                        @else
+                            <strong>Notifikasi tidak dikenal</strong>
+                        @endif
 
-                    @else
-                        <strong>Notifikasi Tidak Dikenali</strong>
-                    @endif
-
-                    <div class="text-muted small">{{ $notification->created_at->diffForHumans() }}</div>
-                </div>
-
-                <div class="d-flex align-items-center gap-2">
-                    <a href="{{ route('notifications.show', $notification->id) }}"
-                       class="btn btn-sm btn-primary">
-                        View
-                    </a>
-
-                    <form action="{{ route('notifications.destroy', $notification->id) }}" method="POST" style="margin-left: 8px;">
-                        @csrf
-                        @method('DELETE')
-                        <button class="btn btn-sm btn-danger" type="submit">
-                            <i class="fas fa-trash"></i> Delete
-                        </button>
-                    </form>
+                        <br>
+                        <small>{{ $notification->created_at->diffForHumans() }}</small>
+                    </div>
                 </div>
             </li>
         @endforeach
-    </ul>
-
-    <div class="mt-3">
-        {{ $notifications->links() }}
-    </div>
 
 
+        </ul>
         <div class="mt-3">
             {{ $notifications->links() }}
         </div>
@@ -85,29 +80,29 @@
     @endif
 @endsection
 @push('scripts')
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        document.querySelectorAll(".notification-item").forEach(item => {
-            item.addEventListener("click", function (e) {
-                // Jika yang diklik tombol View/Delete, jangan tandai read
-                if (e.target.closest('a') || e.target.closest('button')) return;
+    $(document).on('click', '.mark-as-read', function(e) {
+        e.preventDefault();
 
-                const id = this.dataset.id;
-
-                fetch(`/notifications/mark-as-read/${id}`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Accept': 'application/json',
-                    },
-                })
-                .then(res => {
-                    if (res.ok) {
-                        this.classList.remove('bg-light', 'border-left-primary');
-                    }
-                });
-            });
+        const id = $(this).data('id');
+        const url = $(this).data('url');
+        $.ajax({
+            url: `{{url('/notifications/mark-as-read/${id}')}}`,
+            method: 'POST',
+            data: {
+                _token: '{{ csrf_token() }}'
+            },
+            success: function(response) {
+                console.log("Response:", response);
+                window.location.href = url;
+            },
+            error: function(xhr) {
+                console.error("Error Response:", xhr.responseText);
+                // window.location.href = url;
+            }
         });
     });
 </script>
 @endpush
+

@@ -120,7 +120,7 @@ class CartController extends Controller
 
         // Mengambil semua cart item yang berhubungan dengan produk di keranjang
         $cartItems = CartItem::where('user_id', $user->id)
-                             ->with('product') 
+                             ->with('product')
                              ->get();
 
         // Mengembalikan response JSON dengan data produk di keranjang
