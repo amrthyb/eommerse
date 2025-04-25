@@ -39,14 +39,14 @@
             <!-- Input untuk Password Baru -->
             <div class="form-group">
                 <label for="password">{{ __('auth.password') }}</label>
-                <input type="password" name="password" class="form-control" value="{{ old('password') }}">
+                <input type="password" name="password" class="form-control">
                 <small class="form-text text-muted">{{ __('auth.leave_blank_if_not_change_password') }}</small>
             </div>
 
             <!-- Konfirmasi Password -->
             <div class="form-group">
                 <label for="password_confirmation">{{ __('auth.confirm password') }}</label>
-                <input type="password" name="password_confirmation" class="form-control" value="{{ old('password_confirmation') }}">
+                <input type="password" name="password_confirmation" class="form-control">
             </div>
 
             <!-- Input untuk Alamat -->

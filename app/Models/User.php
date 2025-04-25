@@ -9,10 +9,8 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Model;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
-    // iki trait
-    // nah trait iki jerone wes akeh fungsi
     use HasApiTokens, HasFactory, Notifiable;
 
     /**
@@ -20,7 +18,7 @@ class User extends Authenticatable
      *
      * @var array<int, string>
      */
-    protected $fillable = ['name', 'email', 'password', 'role', 'role_id', 'address', 'phone_number'];
+    protected $fillable = ['name', 'email', 'password', 'role', 'role_id', 'address', 'phone_number', 'otp_code', 'otp_expires_at'];
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -29,6 +27,7 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'otp_code',
     ];
 
     /**
@@ -40,6 +39,7 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'otp_expires_at' => 'datetime',
             'password' => 'hashed',
         ];
     }

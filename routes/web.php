@@ -15,6 +15,8 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\AdminController;
 use App\Models\Category;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use Illuminate\Http\Request;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\App;
 
@@ -22,12 +24,13 @@ use Illuminate\Support\Facades\App;
 Route::get('/', function () {
     return redirect('/login');
 });
+
 Route::get('/register', [AuthenticationController::class, 'registerForm'])->name('registerForm');
 Route::post('/register', [AuthenticationController::class, 'register'])->name('register');
 Route::get('/login', [AuthenticationController::class, 'loginForm'])->name('login');
 Route::post('/login', [AuthenticationController::class, 'login']);
 
-Route::get('dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
+Route::get('dashboard', [DashboardController::class, 'index'])->middleware('verified')->name('admin.dashboard');
 
 Route::resource('categories', CategoryController::class);
 Route::post('category/import', [CategoryController::class, 'import'])->name('category.import');
@@ -70,19 +73,32 @@ Route::get('/greeting/{locale}', function (string $locale) {
 })->name('set.language');
 Route::post('/logout', [AuthenticationController::class, 'logout'])->name('logout');
 
-// Route untuk menandai notifikasi sebagai dibaca
+// Route untuk notifikasi
 Route::post('/notifications/mark-as-read/{id}', [NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
-
-
-// Menampilkan daftar notifikasi
 Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
 Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount'])->name('notifications.unreadCount');
-
-// Menampilkan detail notifikasi dan menandainya sebagai sudah dibaca
 Route::get('/notifications/{id}', [NotificationController::class, 'show'])->name('notifications.show');
-
-// Menghapus notifikasi
 Route::delete('/notifications/{id}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
-// web.php
 
+//verifikasi
+Route::get('/email/verify', function () {
+    return view('auth.verify-email');
+})->middleware('auth')->name('verification.notice');
 
+Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+    $request->fulfill();
+    return redirect('dashboard');
+})->middleware(['auth', 'signed'])->name('verification.verify');
+
+//forgot password
+Route::get('/forgot-password', function () {
+    return view('auth.forgot');
+})->name('password.request');
+
+Route::post('/forgot-password', [AuthenticationController::class, 'forgot'])->name('password.email');
+
+Route::get('/reset-password/{token}', function (Request $request,string $token) {
+    return view('auth.reset', ['token' => $token,'request' =>$request]);
+})->name('password.reset');
+
+Route::post('/reset-password', [AuthenticationController::class, 'reset'])->name('password.update');

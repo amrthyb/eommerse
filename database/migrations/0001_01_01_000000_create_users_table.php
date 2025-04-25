@@ -17,7 +17,7 @@ return new class extends Migration
             $table->json('permissions')->nullable();
             $table->timestamps();
         });
-        
+
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name');
@@ -27,6 +27,10 @@ return new class extends Migration
             $table->foreignId('role_id')->nullable()->constrained('roles')->onDelete('set null');
             $table->string('address')->nullable();
             $table->string('phone_number')->nullable();
+            $table->timestamp('email_verified_at')->nullable();
+            $table->string('otp_code')->nullable();
+            $table->timestamp('otp_expires_at')->nullable();
+
             $table->timestamps();
         });
 

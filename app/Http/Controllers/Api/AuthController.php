@@ -2,14 +2,20 @@
 
 namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
+use App\Mail\SendOtpMail;
 use App\Models\User;
 use App\Notifications\NewUserRegistered;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\VerifyEmailOtp;
+use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Support\Facades\Notification;
+use Symfony\Component\Mailer\Messenger\SendEmailMessage;
 
 use function Laravel\Prompts\password;
 
@@ -29,11 +35,25 @@ class AuthController extends Controller
             return response()->json($validator->errors(), 422);
         }
 
+        $otp = rand(100000, 999999); // 6 digit kode OTP
+
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => hash::make($request->password),
+            'otp_code' => $otp,
+            'otp_expires_at' => Carbon::now()->addMinutes(15),
         ]);
+
+         // Try to send OTP email
+    try {
+        // Kirim email verifikasi OTP ke pengguna
+        Mail::to($user->email)->send(new SendOtpMail($user));
+    } catch (\Exception $e) {
+        // Jika gagal mengirim email
+        return response()->json(['message' => 'Failed to send OTP email: ' . $e->getMessage()], 500);
+    }
+
         // Kirim notifikasi ke user & admin
         $admins = User::where('role', 'admin')->get();
         foreach ($admins as $admin) {
@@ -51,6 +71,7 @@ class AuthController extends Controller
             return response()->json(
                 [
                     'success' => true,
+                    'message' => 'User created successfully. Please verify your email using the OTP.',
                     'user' => $user->makeHidden(['password']),
                 ],
                 201,
@@ -65,6 +86,93 @@ class AuthController extends Controller
             ],
             400,
         );
+    }
+
+    public function forgotPassword(Request $request)
+{
+    // Validasi email
+    $validator = Validator::make($request->all(), [
+        'email' => 'required|email|exists:users,email',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json(['error' => $validator->errors()], 422);
+    }
+
+    // Ambil user
+    $user = User::where('email', $request->email)->first();
+
+    // Set OTP
+    $otp = rand(100000, 999999);
+    $user->otp_code = $otp;
+    $user->otp_expires_at = now()->addMinutes(15);
+    $user->save();
+
+    // Kirim OTP ke email (pastikan Mail terkonfigurasi)
+    Mail::raw("Kode OTP Anda adalah: $otp", function ($message) use ($user) {
+        $message->to($user->email)
+                ->subject('Reset Password OTP');
+    });
+
+    return response()->json(['message' => 'OTP telah dikirim ke email Anda.']);
+}
+
+public function updatePassword(Request $request)
+{
+    // Validasi input
+    $validator = Validator::make($request->all(), [
+        'otp' => 'required|numeric',
+        'password' => 'required|string|min:6',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json(['error' => $validator->errors()], 422);
+    }
+
+    // Cari user
+    $user = User::where('otp_code', $request->otp)->first();
+
+    // Verifikasi OTP dan waktu kedaluwarsa
+    if (now()->gt($user->otp_expires_at)) {
+        return response()->json(['error' => 'OTP tidak valid atau sudah kedaluwarsa.'], 403);
+    }
+
+    // Update password
+    $user->password = Hash::make($request->password);
+    $user->otp_code = null;
+    $user->otp_expires_at = null;
+    $user->save();
+
+    return response()->json(['message' => 'Password berhasil diperbarui.']);
+}
+
+    public function verifyOtp(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'otp' => 'required|numeric',
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return response()->json(['message' => 'User not found.'], 404);
+        }
+
+        if ($user->email_verified_at) {
+            return response()->json(['message' => 'Email already verified.'], 200);
+        }
+
+        if ($user->otp_code == $request->otp && now()->lt($user->otp_expires_at)) {
+            $user->email_verified_at = now();
+            $user->otp_code = null;
+            $user->otp_expires_at = null;
+            $user->save();
+
+            return response()->json(['message' => 'Email verified successfully.'], 200);
+        }
+
+        return response()->json(['message' => 'Invalid or expired OTP.'], 400);
     }
 
     public function login(Request $request): JsonResponse
@@ -83,7 +191,6 @@ class AuthController extends Controller
         // Find user by email
         $user = User::where('email', $request->email)->first();
         // Dd($user);
-
         // Check credentials
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json(
@@ -93,6 +200,20 @@ class AuthController extends Controller
                 ],
                 401,
             );
+        }
+
+        // Periksa apakah email sudah diverifikasi
+        if (!$user->email_verified_at) {
+        $otp = rand(100000, 999999); // 6 digit kode OTP
+        $user->update(['otp_code' => $otp,'otp_expires_at' => Carbon::now()->addMinutes(15)]);
+            Mail::to($user->email)->send(new SendOtpMail($user));
+
+            return response()->json(
+                [
+                    'message' => 'Please verify your email first.',
+                ],
+                403,
+            ); // Jika email belum diverifikasi, kembalikan status 403 (Forbidden)
         }
 
         // Create token for the user
@@ -160,7 +281,20 @@ class AuthController extends Controller
 
         // Jika ada data yang perlu diupdate
         if ($validated) {
-            $user->update($validated);
+            if ($user->email != $request->email) {
+                $otp = rand(100000, 999999); // 6 digit kode OTP
+                $validated['otp_code'] = $otp;
+                $validated['otp_expires_at'] = Carbon::now()->addMinutes(15);
+                $validated['email_verified_at'] = null;
+                $user->update($validated);
+                Mail::to($user->email)->send(new SendOtpMail($user));
+                return response()->json(
+                    [
+                        'message' => 'Please verify your email first.',
+                    ],
+                    403,
+                );
+            }
 
             return response()->json(
                 [
