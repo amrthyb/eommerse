@@ -36,7 +36,7 @@ class CartController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Produk berhasil ditambahkan ke keranjang',
+            'message' => __('messageApi.cart item added'),
         ]);
     }
 

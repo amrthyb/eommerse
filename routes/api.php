@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\ProductsController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\OrderController;
+use Illuminate\Support\Facades\Validator;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;

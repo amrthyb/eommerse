@@ -28,6 +28,19 @@
             <input type="text" name="name" class="form-control" value="{{ $admin->name }}" required>
         </div>
 
+        <div class="form-group">
+            <label for="name">{{__('admin.role name')}}</label>
+            <select name="role_id" class="form-control" required>
+                <option value="" disabled selected>-- Pilih Role --</option>
+
+                @foreach ($roles as $role)
+                    <option value="{{ $role->id }}" {{ $role->id == $admin->role_id ? 'selected' : '' }}>
+                        {{ $role->name }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+
         <button type="submit" class="btn btn-primary mt-3">{{__('admin.update role')}}</button>
     </form>
 @endsection

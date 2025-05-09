@@ -26,7 +26,9 @@
                     <td>Rp {{ number_format($order->total_amount, 0, ',', '.') }}</td>
                     <td>{{ ucfirst($order->status) }}</td>
                     <td>
+                        @if(in_array('pesanan.lihat', Auth::user()->roles->permissions ?? []))
                         <a href="{{ route('orders.show', $order->id) }}" class="btn btn-info">View</a>
+                        @endif
                     </td>
                 </tr>
             @endforeach

@@ -12,6 +12,8 @@ class Kernel extends HttpKernel
      * @var array<string, class-string|string>
      */
     protected $routeMiddleware = [
+        'api' => [\App\Http\Middleware\SetApiLocale::class],
         'verified' => \App\Http\Middleware\EnsureEmailIsVerified::class,
+        // 'permission' => \App\Http\Middleware\PermissionMiddleware::class,
     ];
 }

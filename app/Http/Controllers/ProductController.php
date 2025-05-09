@@ -18,6 +18,14 @@ use Illuminate\Support\Facades\Auth;
 
 class ProductController extends Controller
 {
+    public function __construct()
+    {
+
+        $this->middleware('permission:produk.buat')->only(['create', 'store']);
+        $this->middleware('permission:produk.edit')->only(['edit', 'update']);
+        $this->middleware('permission:produk.hapus')->only(['destroy']);
+        $this->middleware('permission:produk')->only(['index']);
+    }
     public function index()
     {
         $products = Product::OrderBy('id','desc')->get();

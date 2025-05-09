@@ -4,14 +4,14 @@
     <h2 class="mt-3">{{ __('product.products') }}</h2>
 
     <div class="button-action" style="margin-bottom: 20px">
+        @if(in_array('produk.buat', Auth::user()->roles->permissions ?? []))
         <a href="{{ route('products.create') }}" class="btn btn-primary mb-md">{{ __('product.add') }}</a>
+        @endif
 
-        <!-- Tombol Import (warna biru) -->
         <button type="button" class="btn btn-info" data-toggle="modal" data-target="#import">
             IMPORT
         </button>
 
-        <!-- Tombol Export (warna hijau) -->
         <form action="{{ route('products.export') }}" method="POST" style="display:inline-block;">
             @csrf
             <button type="submit" class="btn btn-success">EXPORT</button>
@@ -70,7 +70,11 @@
                         @endif
                     </td>
                     <td>
+                        @if(in_array('produk.edit', Auth::user()->roles->permissions ?? []))
                         <a href="{{ route('products.edit', $product->id) }}" class="btn btn-sm btn-primary">Edit</a>
+                        @endif
+
+                        @if(in_array('produk.hapus', Auth::user()->roles->permissions ?? []))
                         <form action="{{ route('products.destroy', $product->id) }}" method="POST"
                             style="display:inline;">
                             @csrf
@@ -78,6 +82,7 @@
                             <button type="submit" class="btn btn-sm btn-danger"
                                 onclick="return confirm('Apakah Anda yakin ingin menghapus produk ini?')">Delete</button>
                         </form>
+                        @endif
                     </td>
                 </tr>
             @endforeach

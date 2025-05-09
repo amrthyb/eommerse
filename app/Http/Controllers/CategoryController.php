@@ -14,6 +14,13 @@ use Illuminate\Support\Facades\Storage;
 
 class CategoryController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:kategori.buat')->only(['create', 'store']);
+        $this->middleware('permission:kategori.edit')->only(['edit', 'update']);
+        $this->middleware('permission:kategori.hapus')->only(['destroy']);
+        $this->middleware('permission:kategori')->only(['index']);
+    }
     public function index()
     {
         // $query dari db

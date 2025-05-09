@@ -26,7 +26,7 @@ class NotificationController extends Controller
 
             // Format responsenya supaya rapi
             $data = $notifications->map(function ($notification) {
-                $type = class_basename($notification->type); // "NewProduct" atau "OrderStatusChanged"
+                $type = class_basename($notification->type);
 
                 return [
                     'id' => $notification->id,
@@ -39,7 +39,7 @@ class NotificationController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Notifikasi produk baru & perubahan status order',
+                'message' => __('messageApi.Notification list fetched'),
                 'data' => $data
             ]);
         }
@@ -56,10 +56,10 @@ class NotificationController extends Controller
 
         if ($notification) {
             $notification->markAsRead();
-            return response()->json(['message' => 'Notification marked as read']);
+            return response()->json(['message' => __('messageApi.Notification marked as read successfully.')]);
         }
 
-        return response()->json(['message' => 'Notification not found'], 404);
+        return response()->json(['message' => __('messageApi.Notification not found')], 404);
     }
 
 

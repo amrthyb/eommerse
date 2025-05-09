@@ -10,6 +10,12 @@ use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
+    public function __construct()
+    {
+
+        $this->middleware('permission:pesanan.lihat')->only(['show']);
+        $this->middleware('permission:pesanan')->only(['index']);
+    }
     public function index()
     {
         // Ambil pesanan yang hanya dimiliki oleh user dengan role 'user'

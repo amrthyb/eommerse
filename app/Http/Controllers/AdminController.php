@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Role;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -11,20 +12,31 @@ use Yajra\DataTables\DataTables;
 
 class AdminController extends Controller
 {
+    public function __construct()
+    {
+
+        $this->middleware('permission:admin.buat')->only(['create', 'store']);
+        $this->middleware('permission:admin.edit')->only(['edit', 'update']);
+        $this->middleware('permission:admin')->only(['index']);
+    }
     // Menampilkan daftar admin
     public function index()
     {
-        // Mengambil data pengguna dengan role 'admin'
-        $admins = DB::table('users')->where('role', 'admin')->orderBy('id', 'desc')->get();
+        $admins = DB::table('users')
+        ->select('users.id', 'users.name', 'users.email', 'roles.name as role_name')
+        ->leftJoin('roles', 'users.role_id', '=', 'roles.id')
+        ->where('users.role', 'admin')
+        ->orderBy('users.id', 'desc')
+        ->get();
         return view('admin.admins.index', compact('admins'));
     }
 
     // Menampilkan halaman edit admin
     public function edit($id)
     {
-        // Ambil data admin berdasarkan ID dari tabel 'users'
         $admin = User::findOrFail($id);
-        return view('admin.admins.edit', compact('admin'));
+        $roles = Role::get();
+        return view('admin.admins.edit', compact('admin', 'roles'));
     }
 
     // Menangani pembaruan data admin
@@ -32,6 +44,7 @@ class AdminController extends Controller
     {
         $admin = User::findOrFail($id);
         $admin->name = $request->input('name');
+        $admin->role_id = $request->input('role_id');
         $admin->save();
 
         return redirect()->route('admins.index')->with('success', 'Admin updated successfully.');

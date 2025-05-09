@@ -26,7 +26,7 @@ class OrderController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Daftar Order',
+            'message' => __('messageApi.orders fetched'),
             'data' => $orders
         ]);
     }
@@ -43,7 +43,7 @@ class OrderController extends Controller
         if ($cartItems->isEmpty()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Keranjang Anda kosong.',
+                'message' => __('messageApi.cart empty'),
             ], 400);
         }
 
@@ -53,14 +53,14 @@ class OrderController extends Controller
             if (!$product) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Produk tidak ditemukan.',
+                    'message' => __('messageApi.no orders found'),
                 ], 400);
             }
 
             if ($product->stock < $cartItem->quantity) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Stok tidak cukup untuk produk: ' . $product->name,
+                    'message' => __('messageApi.Insufficient stock for the selected product') . $product->name,
                 ], 400);
             }
         }
@@ -112,7 +112,7 @@ class OrderController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Checkout berhasil, order Anda sedang diproses.',
+                'message' => __('messageApi.Order placed successfully. Please proceed to payment.'),
                 'order_id' => $order->id,
                 'payment_url' => "https://app.midtrans.com/snap/v2/vtweb/$snapToken"
             ], 200);
@@ -121,7 +121,7 @@ class OrderController extends Controller
             DB::rollBack();
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan saat memproses checkout: ' . $e->getMessage(),
+                'message' => __('messageApi.An error occurred while processing checkout: ') . $e->getMessage(),
             ], 500);
         }
     }

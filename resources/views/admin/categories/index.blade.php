@@ -3,14 +3,15 @@
 @section('content')
     <h2 class="mt-3">{{ __('categories.categories') }}</h2>
     <div class="button-action" style="margin-bottom: 20px">
-        <a href="{{ route('categories.create') }}" class="btn btn-primary mb-md">{{ __('categories.add') }}</a>
 
-        <!-- Tombol Import (warna biru) -->
+        @if(in_array('kategori.buat', Auth::user()->roles->permissions ?? []))
+        <a href="{{ route('categories.create') }}" class="btn btn-primary mb-md">{{ __('categories.add') }}</a>
+        @endif
+
         <button type="button" class="btn btn-info" data-toggle="modal" data-target="#import">
             IMPORT
         </button>
 
-        <!-- Tombol Export (warna hijau) -->
         <form action="{{ route('category.export') }}" method="POST" style="display:inline-block;">
             @csrf
             <button type="submit" class="btn btn-success">EXPORT</button>
@@ -56,7 +57,11 @@
                     <td>{{ $category->name }}</td>
                     <td>{{ $category->description }}</td>
                     <td>
+                        @if(in_array('kategori.edit', Auth::user()->roles->permissions ?? []))
                         <a href="{{ route('categories.edit', $category->id) }}" class="btn btn-sm btn-primary">Edit</a>
+                        @endif
+
+                        @if(in_array('kategori.hapus', Auth::user()->roles->permissions ?? []))
                         <form action="{{ route('categories.destroy', $category->id) }}" method="POST"
                             style="display:inline;">
                             @csrf
@@ -64,6 +69,7 @@
                             <button type="submit" class="btn btn-sm btn-danger"
                                 onclick="return confirm('Are you sure you want to delete this category?')">Delete</button>
                         </form>
+                        @endif
                     </td>
                 </tr>
             @endforeach

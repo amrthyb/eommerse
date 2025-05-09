@@ -32,4 +32,29 @@ return [
     'cart item removed' => 'cart item removed',
     'cart item updated' => 'cart item updated',
 
+    //yang digunakan
+    'Failed to send OTP email' => 'Failed to send OTP email',
+    'User created successfully' => 'User created successfully. Please verify your email using the OTP.',
+    'User creation failed' => 'User creation failed.',
+    'OTP has been sent to your email' => 'OTP has been sent to your email.',
+    'OTP is invalid or expired' => 'OTP is invalid or expired.',
+    'Email already verified' => 'Email already verified.',
+    'Email verified successfully' => 'Email verified successfully.',
+    'Invalid or expired OTP' => 'Invalid or expired OTP.',
+    'Invalid credentials' => 'Invalid credentials.',
+    'Please verify your email first' => 'Please verify your email first.',
+    'User not authenticated' => 'User not authenticated.',
+    'The email address is already in use by another user' => 'The email address is already in use by another user.',
+    'You are still using the same email address' => 'You are still using the same email address.',
+    'Please verify your email first' => 'Please verify your email first.',
+    'User details updated successfully' => 'User details updated successfully.',
+    'Validation failed' => 'Validation failed.',
+    'User not authenticated' => 'User not authenticated.',
+    'Notification not found' => 'Notification not found',
+    'An error occurred while processing checkout: ' => 'An error occurred while processing checkout: ',
+    'User not authenticated' => 'User not authenticated.',
+
+
+
+
 ];

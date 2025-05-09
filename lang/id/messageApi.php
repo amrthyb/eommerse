@@ -32,4 +32,29 @@ return [
     'cart item removed' => 'item keranjang berhasil dihapus',
     'cart item updated' => 'item keranjang berhasil diperbarui',
 
+    //yang digunakan
+    'Failed to send OTP email' => 'Gagal mengirim email OTP',
+    'User created successfully' => 'Pengguna berhasil dibuat. Harap verifikasi email Anda menggunakan OTP.',
+    'User creation failed' => 'Pembuatan pengguna gagal.',
+    'OTP has been sent to your email' => 'OTP telah dikirim ke email Anda.',
+    'OTP is invalid or expired' => 'OTP tidak valid atau sudah kedaluwarsa.',
+    'Email already verified' => 'Email sudah diverifikasi.',
+    'Email verified successfully' => 'Email berhasil diverifikasi.',
+    'Invalid or expired OTP' => 'OTP tidak valid atau kedaluwarsa.',
+    'Invalid credentials' => 'Kredensial tidak valid.',
+    'Please verify your email first' => 'Silakan verifikasi email Anda terlebih dahulu.',
+    'User not authenticated' => 'Pengguna tidak diautentikasi.',
+    'The email address is already in use by another user' => 'Alamat email tersebut sudah digunakan oleh pengguna lain.',
+    'You are still using the same email address' => 'Anda masih menggunakan alamat email yang sama',
+    'Please verify your email first' => 'Silakan verifikasi email Anda terlebih dahulu.',
+    'User details updated successfully' => 'Detail pengguna berhasil diperbarui.',
+    'Validation failed' => 'Validasi gagal.',
+    'User not authenticated' => 'Pengguna tidak diautentikasi.',
+    'Notification not found' => 'Tidak ada notifikasi',
+    'An error occurred while processing checkout: ' => 'Terjadi kesalahan saat memproses checkout: ',
+    'User not authenticated' => 'Pengguna tidak diautentikasi.',
+
+
+
+
 ];

@@ -13,6 +13,9 @@
     <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css"> -->
 </head>
 <body>
+    {{-- @php
+    $permissions = Auth::user()->role->permissions ?? 'no';
+@endphp --}}
 
     <div class="container-fluid">
         <div class="row">
@@ -20,42 +23,68 @@
             <nav class="col-md-2 d-flex flex-column flex-shrink-0 p-3 bg-light ">
                 <div class="sidebar-sticky">
                     <ul class="nav nav-pills flex-column mb-auto">
+
                         <li class="nav-item">
                             <a class="nav-link d-flex align-items-center text-black {{ request()->routeIs('admin.dashboard*') ? 'active' : '' }}" aria-current="page" href="{{ route('admin.dashboard') }}">
                             <img src="{{ asset('assets/dashboard.svg') }}" alt="Dashboard" style="width: 20px; height: 20px; margin-right: 5px;">
                                 Dashboard
                             </a>
                         </li>
+
+                        @if(in_array('kategori', Auth::user()->roles->permissions ?? []))
                         <li class="nav-item">
                             <a class="nav-link d-flex align-items-center text-black {{ request()->routeIs('categories*') ? 'active' : '' }}" href="{{ route('categories.index') }}">
                                 <img src="{{ asset('assets/category.svg') }}" alt="Categories" style="width: 20px; height: 20px; margin-right: 5px;">
                                 {{__('sidebar.categories')}}
                             </a>
                         </li>
+                        @endif
+
+                        @if(in_array('produk', Auth::user()->roles->permissions ?? []))
                         <li class="nav-item">
                             <a class="nav-link d-flex align-items-center text-black {{ request()->routeIs('products*') ? 'active' : '' }}" href="{{ route('products.index') }}">
                             <img src="{{ asset('assets/product.svg') }}" alt="Products" style="width: 20px; height: 20px; margin-right: 5px;">
                                 {{__('sidebar.products')}}
                             </a>
                         </li>
+                        @endif
+
+                        @if(in_array('pengguna', Auth::user()->roles->permissions ?? []))
                         <li class="nav-item">
                             <a class="nav-link d-flex align-items-center text-black {{ request()->routeIs('users*') ? 'active' : '' }}" href="{{ route('users.index') }}">
                             <img src="{{ asset('assets/user.svg') }}" alt="Users" style="width: 20px; height: 20px; margin-right: 5px;">
                                 {{__('sidebar.users')}}
                             </a>
                         </li>
+                        @endif
+
+                        @if(in_array('admin', Auth::user()->roles->permissions ?? []))
                         <li class="nav-item">
                             <a class="nav-link d-flex align-items-center text-black {{ request()->routeIs('admins*') ? 'active' : '' }}" href="{{ route('admins.index') }}">
                             <img src="{{ asset('assets/admin.svg') }}" alt="Admins" style="width: 19px; height: 19px; margin-right: 6px;">
                                 {{__('sidebar.admins')}}
                             </a>
                         </li>
+                        @endif
+
+                        @if(in_array('pesanan', Auth::user()->roles->permissions ?? []))
                         <li class="nav-item">
                             <a class="nav-link d-flex align-items-center text-black {{ request()->routeIs('order*') ? 'active' : '' }}" href="{{ route('orders.index') }}">
                             <img src="{{ asset('assets/order.svg') }}" alt="Orders" style="width: 20px; height: 20px; margin-right: 5px;">
                                 {{__('sidebar.orders')}}
                             </a>
                         </li>
+                        @endif
+
+                        @if(in_array('peran', Auth::user()->roles->permissions ?? []))
+                        <li class="nav-item">
+                            <a class="nav-link d-flex align-items-center text-black {{ request()->routeIs('roles*') ? 'active' : '' }}" href="{{ route('roles.index') }}">
+                            <img src="{{ asset('assets/key.svg') }}" alt="roles" style="width: 20px; height: 20px; margin-right: 5px;">
+                                {{__('sidebar.roles')}}
+                            </a>
+                        </li>
+                        @endif
+                        
                         <li class="nav-item">
                             <a class="nav-link d-flex align-items-center text-black {{ request()->routeIs('settings*') ? 'active' : '' }}" href="{{ route('settings.index') }}">
                             <img src="{{ asset('assets/gear.svg') }}" alt="Settings" style="width: 20px; height: 20px; margin-right: 5px;">

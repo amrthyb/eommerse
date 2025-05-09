@@ -15,6 +15,11 @@ use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:pengguna.hapus')->only(['show']);
+        $this->middleware('permission:pengguna')->only(['index']);
+    }
     public function index()
     {
         // Ambil semua pengguna dengan role 'user'
@@ -29,7 +34,7 @@ class UserController extends Controller
         $user = User::findOrFail($id);
         $orders = Order::where('user_id', $id)->orderBy('id')->get();
         // dd($orders);
-        
+
         return view('admin.users.show', compact('user', 'orders'));
     }
 

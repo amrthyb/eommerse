@@ -14,6 +14,7 @@ use App\Http\Middleware\Permission;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\RolesController;
 use App\Models\Category;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
@@ -62,6 +63,14 @@ Route::get('/order/export', [OrderController::class, 'export'])->name('orders.ex
 Route::get('settings', [AuthenticationController::class, 'settingView'])->name('settings.index');
 Route::post('settings/email', [AuthenticationController::class, 'emailChange'])->name('settings.store');
 Route::post('update-account',[AuthenticationController::class,'updateAccount'])->name('update-account');
+
+Route::get('roles',[RolesController::class,'index'])->name('roles.index');
+Route::get('roles-add',[RolesController::class,'create'])->name('roles.create');
+Route::post('roles/add',[RolesController::class,'store'])->name('roles.store');
+Route::get('roles/{id}/edit',[RolesController::class,'edit'])->name('roles.edit');
+Route::put('roles/{id}',[RolesController::class,'update'])->name('roles.update');
+Route::delete('roles/{id}',[RolesController::class,'destroy'])->name('roles.destroy');
+
 
 Route::get('/greeting/{locale}', function (string $locale) {
     if (! in_array($locale, ['en', 'id'])) {

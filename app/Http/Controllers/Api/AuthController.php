@@ -35,7 +35,7 @@ class AuthController extends Controller
             return response()->json($validator->errors(), 422);
         }
 
-        $otp = rand(100000, 999999); // 6 digit kode OTP
+        $otp = rand(100000, 999999);
 
         $user = User::create([
             'name' => $request->name,
@@ -51,7 +51,7 @@ class AuthController extends Controller
         Mail::to($user->email)->send(new SendOtpMail($user));
     } catch (\Exception $e) {
         // Jika gagal mengirim email
-        return response()->json(['message' => 'Failed to send OTP email: ' . $e->getMessage()], 500);
+        return response()->json(['message' => __('messageApi.Failed to send OTP email') . $e->getMessage()], 500);
     }
 
         // Kirim notifikasi ke user & admin
@@ -63,6 +63,7 @@ class AuthController extends Controller
         return response()->json(
             [
                 'ok' => $user,
+                'message' => __('messageApi.User created successfully'),
             ],
             201,
         );
@@ -71,7 +72,6 @@ class AuthController extends Controller
             return response()->json(
                 [
                     'success' => true,
-                    'message' => 'User created successfully. Please verify your email using the OTP.',
                     'user' => $user->makeHidden(['password']),
                 ],
                 201,
@@ -82,7 +82,7 @@ class AuthController extends Controller
         return response()->json(
             [
                 'success' => false,
-                'message' => 'User creation failed.',
+                'message' => __('messageApi.User creation failed'),
             ],
             400,
         );
@@ -108,13 +108,13 @@ class AuthController extends Controller
     $user->otp_expires_at = now()->addMinutes(15);
     $user->save();
 
-    // Kirim OTP ke email (pastikan Mail terkonfigurasi)
+    // Kirim OTP ke email
     Mail::raw("Kode OTP Anda adalah: $otp", function ($message) use ($user) {
         $message->to($user->email)
                 ->subject('Reset Password OTP');
     });
 
-    return response()->json(['message' => 'OTP telah dikirim ke email Anda.']);
+    return response()->json(['message' => __('messageApi.OTP has been sent to your email')]);
 }
 
 public function updatePassword(Request $request)
@@ -134,7 +134,7 @@ public function updatePassword(Request $request)
 
     // Verifikasi OTP dan waktu kedaluwarsa
     if (now()->gt($user->otp_expires_at)) {
-        return response()->json(['error' => 'OTP tidak valid atau sudah kedaluwarsa.'], 403);
+        return response()->json(['error' => __('messageApi.OTP is invalid or expired')], 403);
     }
 
     // Update password
@@ -143,7 +143,7 @@ public function updatePassword(Request $request)
     $user->otp_expires_at = null;
     $user->save();
 
-    return response()->json(['message' => 'Password berhasil diperbarui.']);
+    return response()->json(['message' => __('messageApi.Password has been reset successfully.')]);
 }
 
     public function verifyOtp(Request $request)
@@ -156,11 +156,11 @@ public function updatePassword(Request $request)
         $user = User::where('email', $request->email)->first();
 
         if (!$user) {
-            return response()->json(['message' => 'User not found.'], 404);
+            return response()->json(['message' => __('messageApi.user not found')], 404);
         }
 
         if ($user->email_verified_at) {
-            return response()->json(['message' => 'Email already verified.'], 200);
+            return response()->json(['message' => __('messageApi.Email already verified')], 200);
         }
 
         if ($user->otp_code == $request->otp && now()->lt($user->otp_expires_at)) {
@@ -169,10 +169,10 @@ public function updatePassword(Request $request)
             $user->otp_expires_at = null;
             $user->save();
 
-            return response()->json(['message' => 'Email verified successfully.'], 200);
+            return response()->json(['message' => __('messageApi.Email verified successfully')], 200);
         }
 
-        return response()->json(['message' => 'Invalid or expired OTP.'], 400);
+        return response()->json(['message' => __('messageApi.Invalid or expired OTP')], 400);
     }
 
     public function login(Request $request): JsonResponse
@@ -196,7 +196,7 @@ public function updatePassword(Request $request)
             return response()->json(
                 [
                     'success' => false,
-                    'message' => 'Invalid credentials.',
+                    'message' => __('messageApi.Invalid credentials'),
                 ],
                 401,
             );
@@ -204,16 +204,16 @@ public function updatePassword(Request $request)
 
         // Periksa apakah email sudah diverifikasi
         if (!$user->email_verified_at) {
-        $otp = rand(100000, 999999); // 6 digit kode OTP
+        $otp = rand(100000, 999999);
         $user->update(['otp_code' => $otp,'otp_expires_at' => Carbon::now()->addMinutes(15)]);
             Mail::to($user->email)->send(new SendOtpMail($user));
 
             return response()->json(
                 [
-                    'message' => 'Please verify your email first.',
+                    'message' => __('messageApi.Please verify your email first'),
                 ],
                 403,
-            ); // Jika email belum diverifikasi, kembalikan status 403 (Forbidden)
+            );
         }
 
         // Create token for the user
@@ -237,7 +237,7 @@ public function updatePassword(Request $request)
             return response()->json(
                 [
                     'success' => false,
-                    'message' => 'User not authenticated.',
+                    'message' => __('messageApi.User not authenticated'),
                 ],
                 401,
             );
@@ -252,7 +252,7 @@ public function updatePassword(Request $request)
                 return response()->json(
                     [
                         'success' => false,
-                        'message' => 'The email address is already in use by another user.',
+                        'message' => __('messageApi.The email address is already in use by another user'),
                     ],
                     400,
                 );
@@ -263,7 +263,7 @@ public function updatePassword(Request $request)
                 return response()->json(
                     [
                         'success' => true,
-                        'message' => 'You are still using the same email address.',
+                        'message' => __('messageApi.You are still using the same email address'),
                     ],
                     200,
                 );
@@ -290,7 +290,7 @@ public function updatePassword(Request $request)
                 Mail::to($user->email)->send(new SendOtpMail($user));
                 return response()->json(
                     [
-                        'message' => 'Please verify your email first.',
+                        'message' => __('messageApi.Please verify your email first'),
                     ],
                     403,
                 );
@@ -299,7 +299,7 @@ public function updatePassword(Request $request)
             return response()->json(
                 [
                     'success' => true,
-                    'message' => 'User details updated successfully.',
+                    'message' => __('messageApi.update success'),
                     'data' => $user,
                 ],
                 200,
@@ -310,7 +310,7 @@ public function updatePassword(Request $request)
         return response()->json(
             [
                 'success' => false,
-                'message' => 'Validation failed.',
+                'message' => __('messageApi.Validation failed'),
             ],
             422,
         );
@@ -324,7 +324,7 @@ public function updatePassword(Request $request)
             return response()->json(
                 [
                     'success' => false,
-                    'message' => 'User not authenticated.',
+                    'message' => __('messageApi.User not authenticated'),
                 ],
                 401,
             );
@@ -337,7 +337,7 @@ public function updatePassword(Request $request)
 
         return response()->json([
             'success' => true,
-            'message' => 'Logged out successfully.',
+            'message' =>__('messageApi.logout success'),
         ]);
     }
 

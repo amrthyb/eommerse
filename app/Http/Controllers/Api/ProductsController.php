@@ -30,7 +30,7 @@ class ProductsController extends Controller
         // Mengembalikan response JSON
         return response()->json([
             'success' => true,
-            'message' => 'Daftar Produk',
+            'message' => __('messageApi.products list fetched'),
             'data' => $products
         ]);
     }
