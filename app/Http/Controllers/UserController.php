@@ -17,12 +17,11 @@ class UserController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('permission:pengguna.hapus')->only(['show']);
+        $this->middleware('permission:pengguna.lihat')->only(['show']);
         $this->middleware('permission:pengguna')->only(['index']);
     }
     public function index()
     {
-        // Ambil semua pengguna dengan role 'user'
         $users = User::where('role', 'user')->get();
 
         return view('admin.users.index', compact('users'));
@@ -30,7 +29,6 @@ class UserController extends Controller
 
     public function show($id)
     {
-        // Ambil data user berdasarkan ID
         $user = User::findOrFail($id);
         $orders = Order::where('user_id', $id)->orderBy('id')->get();
         // dd($orders);
@@ -40,7 +38,6 @@ class UserController extends Controller
 
     public function export()
     {
-        // Menyimpan export ke dalam file Excel dengan nama 'users.xlsx'
         return Excel::download(new UserExport(), 'users.xlsx');
     }
 

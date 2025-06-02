@@ -7,7 +7,7 @@
 <a href="{{ route('admins.create') }}" class="btn btn-primary mb-3">{{ __('admin.add') }}</a>
 @endif
 
-<table id="adminTable" class="table table-striped" style="width:100%">
+<table id="table" class="table table-striped" style="width:100%">
     <thead>
         <tr>
             <th>ID</th>

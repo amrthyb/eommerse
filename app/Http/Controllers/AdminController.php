@@ -19,7 +19,7 @@ class AdminController extends Controller
         $this->middleware('permission:admin.edit')->only(['edit', 'update']);
         $this->middleware('permission:admin')->only(['index']);
     }
-    // Menampilkan daftar admin
+
     public function index()
     {
         $admins = DB::table('users')
@@ -28,10 +28,10 @@ class AdminController extends Controller
         ->where('users.role', 'admin')
         ->orderBy('users.id', 'desc')
         ->get();
+
         return view('admin.admins.index', compact('admins'));
     }
 
-    // Menampilkan halaman edit admin
     public function edit($id)
     {
         $admin = User::findOrFail($id);
@@ -39,7 +39,6 @@ class AdminController extends Controller
         return view('admin.admins.edit', compact('admin', 'roles'));
     }
 
-    // Menangani pembaruan data admin
     public function update(Request $request, $id)
     {
         $admin = User::findOrFail($id);
@@ -50,23 +49,19 @@ class AdminController extends Controller
         return redirect()->route('admins.index')->with('success', 'Admin updated successfully.');
     }
 
-    // Menampilkan halaman create admin
     public function create()
     {
         return view('admin.admins.create');
     }
 
-    // Menangani penyimpanan data admin baru
     public function store(Request $request)
     {
-        // Validasi input
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|confirmed|min:8',
         ]);
 
-        // Menyimpan admin baru ke tabel 'users'
         User::create([
             'name' => $request->input('name'),
             'email' => $request->input('email'),
@@ -76,14 +71,12 @@ class AdminController extends Controller
 
         return redirect()->route('admins.index')->with('success', 'Admin created successfully.');
     }
-        // Method untuk menghapus admin
+
     public function destroy($id)
     {
-        // Cari admin berdasarkan ID
         $admin = User::findOrFail($id);
         $admin->delete();
 
-        // Redirect ke halaman daftar admin dengan pesan sukses
         return redirect()->route('admins.index')->with('success', 'Admin deleted successfully.');
     }
 

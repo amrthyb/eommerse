@@ -8,9 +8,13 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\User;
+use App\Models\Payment;
 use App\Notifications\NewOrder;
+use App\Notifications\OrderStatusChanged;
 use App\Services\PaymentService;
+use Barryvdh\DomPDF\Facade\PDF;
 use Illuminate\Http\Request;
+use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -20,14 +24,12 @@ class OrderController extends Controller
     public function getOrders()
     {
         $user = Auth::user();
-        $orders = Order::where('user_id', $user->id)
-                       ->with('orderItems.product')
-                       ->get();
+        $orders = Order::where('user_id', $user->id)->with('orderItems.product')->get();
 
         return response()->json([
             'success' => true,
             'message' => __('messageApi.orders fetched'),
-            'data' => $orders
+            'data' => $orders,
         ]);
     }
 
@@ -41,27 +43,36 @@ class OrderController extends Controller
         $user = User::find(Auth::user()->id);
         $cartItems = CartItem::where('user_id', $user->id)->get();
         if ($cartItems->isEmpty()) {
-            return response()->json([
-                'success' => false,
-                'message' => __('messageApi.cart empty'),
-            ], 400);
+            return response()->json(
+                [
+                    'success' => false,
+                    'message' => __('messageApi.cart empty'),
+                ],
+                400,
+            );
         }
 
         // Periksa stok produk
         foreach ($cartItems as $cartItem) {
             $product = Product::find($cartItem->product_id);
             if (!$product) {
-                return response()->json([
-                    'success' => false,
-                    'message' => __('messageApi.no orders found'),
-                ], 400);
+                return response()->json(
+                    [
+                        'success' => false,
+                        'message' => __('messageApi.no orders found'),
+                    ],
+                    400,
+                );
             }
 
             if ($product->stock < $cartItem->quantity) {
-                return response()->json([
-                    'success' => false,
-                    'message' => __('messageApi.Insufficient stock for the selected product') . $product->name,
-                ], 400);
+                return response()->json(
+                    [
+                        'success' => false,
+                        'message' => __('messageApi.Insufficient stock for the selected product') . $product->name,
+                    ],
+                    400,
+                );
             }
         }
 
@@ -95,34 +106,120 @@ class OrderController extends Controller
 
             $order->total_amount = $totalAmount;
             $order->save();
-            // Kirim notifikasi ke user & admin
-            $admins = User::where('role','admin')->get();
-            foreach($admins as $admin){
-                // sementara no cc email
-                $admin->notify(new NewOrder($order,));
+            $order->load('user', 'orderItems.product');
+            $admins = User::where('role', 'admin')->get();
+            foreach ($admins as $admin) {
+                $admin->notify(new NewOrder($order));
             }
 
-            // Hapus item dari keranjang
             CartItem::where('user_id', $user->id)->delete();
 
             DB::commit();
 
-            // Buat transaksi Midtrans
             $snapToken = $paymentService->createTransaction($order);
 
-            return response()->json([
-                'success' => true,
-                'message' => __('messageApi.Order placed successfully. Please proceed to payment.'),
-                'order_id' => $order->id,
-                'payment_url' => "https://app.midtrans.com/snap/v2/vtweb/$snapToken"
-            ], 200);
-
+            return response()->json(
+                [
+                    'success' => true,
+                    'message' => __('messageApi.Order placed successfully. Please proceed to payment.'),
+                    'order_id' => $order->id,
+                    'payment_url' => "https://app.sandbox.midtrans.com/snap/v2/vtweb/$snapToken",
+                ],
+                200,
+            );
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json([
-                'success' => false,
-                'message' => __('messageApi.An error occurred while processing checkout: ') . $e->getMessage(),
-            ], 500);
+            return response()->json(
+                [
+                    'success' => false,
+                    'message' => __('messageApi.An error occurred while processing checkout: ') . $e->getMessage(),
+                ],
+                500,
+            );
         }
+    }
+
+    public function handleCallback(Request $request)
+    {
+        $payload = $request->all();
+        \Log::info('Midtrans Notification Payload:', $payload);
+
+        $transactionStatus = $payload['transaction_status'] ?? null;
+        $orderId = $payload['order_id'] ?? null;
+        $transactionId = $payload['transaction_id'] ?? null;
+        $grossAmount = $payload['gross_amount'] ?? 0;
+
+        if (!$transactionStatus || !$orderId || !$transactionId) {
+            return response()->json(
+                [
+                    'success' => false,
+                    'message' => 'Invalid Midtrans notification payload',
+                ],
+                400,
+            );
+        }
+
+        $order = Order::find($orderId);
+        if (!$order) {
+            return response()->json(
+                [
+                    'success' => false,
+                    'message' => 'Order not found',
+                ],
+                404,
+            );
+        }
+
+        if (in_array($transactionStatus, ['capture', 'settlement'])) {
+            try {
+                $existingPayment = Payment::where('transaction_id', $transactionId)->first();
+                if (!$existingPayment) {
+                    Payment::create([
+                        'order_id' => $order->id,
+                        'payment_status' => 'completed',
+                        'amount' => $grossAmount,
+                        'transaction_id' => $transactionId,
+                        'payment_date' => now(),
+                    ]);
+                }
+                // dd($payload, $transactionStatus, $orderId, $order);
+
+                $order->status = 'completed';
+                $order->save();
+
+                $order->load('user', 'orderItems.product');
+                $pdf = PDF::loadView('pdf.invoice', ['order' => $order])->output();
+                $order->user->notify(new OrderStatusChanged($order, $pdf));
+                $admins = User::where('role', 'admin')->get();
+
+                foreach ($admins as $admin) {
+                    if ($admin->id !== $order->user->id) {
+                        $admin->notify(new OrderStatusChanged($order, $pdf));
+                    }
+                }
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Transaction captured and order marked as paid.',
+                ]);
+            } catch (\Exception $e) {
+                \Log::error('Failed to process payment callback: ' . $e->getMessage());
+                return response()->json(
+                    [
+                        'success' => false,
+                        'message' => 'Failed to update payment or order',
+                    ],
+                    500,
+                );
+            }
+        }
+
+        $order->status = 'pending';
+        $order->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Transaction received but not marked as paid.',
+        ]);
     }
 }

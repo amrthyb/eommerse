@@ -6,7 +6,7 @@ namespace App\Services;
 use App\Models\Order;
 use Midtrans\Snap;
 use Midtrans\Config;
-
+use Illuminate\Support\Facades\Log;
 class PaymentService
 {
     public function __construct()
@@ -22,8 +22,23 @@ class PaymentService
     }
 
     // Membuat transaksi Midtrans
-    public function createTransaction($order)
+    public function createTransaction(Order $order)
     {
+        // Pastikan relasi user dimuat
+        if (!$order->relationLoaded('user')) {
+            $order->load('user');
+        }
+
+        // Bisa juga tambahkan item details (optional)
+        $itemDetails = $order->orderItems->map(function ($item) {
+            return [
+                'id' => $item->product_id,
+                'price' => $item->price,
+                'quantity' => $item->quantity,
+                'name' => $item->product->name ?? 'Product',
+            ];
+        })->toArray();
+
         $params = [
             'transaction_details' => [
                 'order_id' => $order->id,
@@ -32,8 +47,9 @@ class PaymentService
             'customer_details' => [
                 'first_name' => $order->user->name,
                 'email' => $order->user->email,
-            ]
-            
+            ],
+            'item_details' => $itemDetails,
+
             // 'transaction_details' => [
             //     'order_id' => $order->order_id,
             //     'gross_amount' => $order->price,
@@ -45,9 +61,12 @@ class PaymentService
 
         // Mengambil token pembayaran dari Midtrans
         try {
+            Log::info('buat transaksi midtrans dengan params: ', $params);
             $snapToken = Snap::getSnapToken($params);
+            Log::info('generate snap token midtrans: ', ['token' => $snapToken]);
             return $snapToken;
         } catch (\Exception $e) {
+            Log::error('midtrans snap error: '. $e->getMessage());
             throw new \Exception('Error while processing transaction: ' . $e->getMessage());
         }
     }

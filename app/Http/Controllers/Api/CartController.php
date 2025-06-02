@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\Auth;
 
 class CartController extends Controller
 {
-    // Menambahkan produk ke keranjang
     public function addToCart(Request $request)
     {
         $request->validate([
@@ -40,7 +39,6 @@ class CartController extends Controller
         ]);
     }
 
-    // Menghapus produk dari keranjang
     public function removeFromCart(Request $request)
     {
         $request->validate([
@@ -67,7 +65,6 @@ class CartController extends Controller
         ]);
     }
 
-    // Mengupdate kuantitas produk di keranjang
     public function updateQuantity(Request $request)
     {
         $request->validate([
@@ -75,7 +72,6 @@ class CartController extends Controller
             'quantity' => 'required|integer|min:1',
         ]);
 
-        // Update kuantitas produk di keranjang
         $user = Auth::user();
         $cartItem = CartItem::where('user_id', $user->id)
                             ->where('product_id', $request->product_id)
@@ -96,10 +92,8 @@ class CartController extends Controller
         ]);
     }
 
-    // Menampilkan keranjang pengguna
     public function getCart()
     {
-        // Menampilkan produk di keranjang untuk user yang sedang login
         $user = Auth::user();
         $cartItems = CartItem::where('user_id', $user->id)
                              ->with('product')
@@ -112,18 +106,11 @@ class CartController extends Controller
         ]);
     }
 
-    // Menampilkan daftar produk di keranjang (index)
     public function index()
     {
-        // Mendapatkan semua produk yang ada di keranjang pengguna yang sedang login
         $user = Auth::user();
+        $cartItems = CartItem::where('user_id', $user->id)->with('product')->get();
 
-        // Mengambil semua cart item yang berhubungan dengan produk di keranjang
-        $cartItems = CartItem::where('user_id', $user->id)
-                             ->with('product')
-                             ->get();
-
-        // Mengembalikan response JSON dengan data produk di keranjang
         return response()->json([
             'success' => true,
             'message' => 'Daftar produk di keranjang',

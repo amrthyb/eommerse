@@ -29,6 +29,7 @@
                         @if(in_array('pesanan.lihat', Auth::user()->roles->permissions ?? []))
                         <a href="{{ route('orders.show', $order->id) }}" class="btn btn-info">View</a>
                         @endif
+                        <a href="{{ route('orders.invoice', $order->id) }}" class="btn btn-danger">Invoice</a>
                     </td>
                 </tr>
             @endforeach

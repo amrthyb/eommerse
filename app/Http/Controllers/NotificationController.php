@@ -25,24 +25,20 @@ class NotificationController extends Controller
 
     public function show($id)
     {
-        // Mencari notifikasi berdasarkan ID untuk user yang sedang login
+
         $notification = auth()->user()->notifications()->findOrFail($id);
-        // Tandai notifikasi sebagai telah dibaca
         $notification->markAsRead();
 
-        // Jika tipe tidak dikenali, kembali ke halaman notifikasi
         return redirect()->route('notifications.index');
     }
 
-    // Menghapus notifikasi
-    public function destroy($id)
-    {
-        $notification = auth()->user()->notifications()->findOrFail($id);
-        $notification->delete();
-        return redirect()->route('notifications.index')->with('success', 'Notifikasi berhasil dihapus.');
-    }
+    // public function destroy($id)
+    // {
+    //     $notification = auth()->user()->notifications()->findOrFail($id);
+    //     $notification->delete();
+    //     return redirect()->route('notifications.index')->with('success', 'Notifikasi berhasil dihapus.');
+    // }
 
-    // Ambil jumlah notifikasi belum dibaca
     public function unreadCount()
     {
         $unreadCount = auth()->user()->unreadNotifications()

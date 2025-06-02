@@ -33,7 +33,6 @@
                     </ul>
                 </div>
 
-                <!-- resources/views/layouts/admin.blade.php -->
                 <div id="notificationBell" class="ms-3 position-relative">
                     <a href="{{ route('notifications.index') }}">
                         <img src="{{ asset('assets/bell.svg') }}" alt="Dashboard"

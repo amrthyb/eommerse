@@ -24,7 +24,6 @@ class AuthenticationController extends Controller
 
     public function register(Request $request)
     {
-        // Validasi input form registrasi
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
@@ -33,7 +32,6 @@ class AuthenticationController extends Controller
             'phone_number' => 'required|numeric|min:10',
         ]);
 
-        // Membuat pengguna baru
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
@@ -48,7 +46,6 @@ class AuthenticationController extends Controller
 
         Auth::user()->sendEmailVerificationNotification();
 
-        // cek apakah role admin?
         if ($user->role == 'admin') {
             return redirect('dashboard')->with('success', 'Registration successful. Welcome to the admin dashboard.');
         }
@@ -63,23 +60,19 @@ class AuthenticationController extends Controller
 
     public function login(Request $request)
     {
-        // Validasi form login
         $validated = $request->validate([
             'email' => 'required|email',
             'password' => 'required',
         ]);
 
-        // Cek apakah email dan password valid
         $user = User::where('email', $request->email)->first();
 
-        // Jika user tidak ada atau password salah
         if (!$user || !Hash::check($request->password, $user->password)) {
             return back()
                 ->withErrors(['email' => 'The provided credentials are incorrect.'])
                 ->withInput();
         }
 
-        // Setelah login berhasil, periksa apakah user adalah admin
         if ($user->role !== 'admin') {
             Auth::logout();
             return back()
@@ -87,10 +80,8 @@ class AuthenticationController extends Controller
                 ->withInput();
         }
 
-        // Jika user adalah admin, lanjutkan login
         Auth::login($user);
 
-        // Arahkan ke dashboard admin setelah berhasil login
         return redirect('dashboard')->with('success', 'Login as admin successful.');
     }
 
@@ -106,14 +97,12 @@ class AuthenticationController extends Controller
 
     public function emailChange(Request $request)
     {
-        // Mendapatkan data pengguna yang sedang login
         $user = Auth::user();
         return view('admin.settings.index', compact('user'));
     }
 
     public function updateAccount(Request $request)
     {
-        // Validasi data yang telah diinputkan
         // dd(Auth::user()->id);
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -123,20 +112,18 @@ class AuthenticationController extends Controller
             'phone_number' => 'required|numeric|min:10',
         ]);
 
-        // Ambil pengguna yang sedang login
         $form = $request->except('password', '_token', 'password_confirmation');
         $form['email_verified_at'] = null;
         $user = User::where('id', Auth::user()->id)->first();
         $user->update($form);
         $user->sendEmailVerificationNotification();
-        // Redirect ke halaman dashboard dengan pesan sukses
+
         return redirect('/dashboard')->with('success', 'Your account details have been updated successfully.');
     }
 
     public function forgot(Request $request)
     {
         $request->validate(['email' => 'required|email']);
-
         $status = Password::sendResetLink($request->only('email'));
 
         return $status === Password::ResetLinkSent ? back()->with(['status' => __($status)]) : back()->withErrors(['email' => __($status)]);

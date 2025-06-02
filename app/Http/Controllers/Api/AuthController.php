@@ -23,14 +23,12 @@ class AuthController extends Controller
 {
     public function register(Request $request)
     {
-        //set validation
         $validator = Validator::make($request->all(), [
             'name' => 'required',
             'email' => 'required|email|unique:users',
             'password' => 'required|min:8|confirmed',
         ]);
 
-        // if validation fails
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }
@@ -45,16 +43,13 @@ class AuthController extends Controller
             'otp_expires_at' => Carbon::now()->addMinutes(15),
         ]);
 
-         // Try to send OTP email
     try {
-        // Kirim email verifikasi OTP ke pengguna
         Mail::to($user->email)->send(new SendOtpMail($user));
     } catch (\Exception $e) {
-        // Jika gagal mengirim email
+
         return response()->json(['message' => __('messageApi.Failed to send OTP email') . $e->getMessage()], 500);
     }
 
-        // Kirim notifikasi ke user & admin
         $admins = User::where('role', 'admin')->get();
         foreach ($admins as $admin) {
             sleep(2);
@@ -78,7 +73,6 @@ class AuthController extends Controller
             );
         }
 
-        //return JSON process insert failed
         return response()->json(
             [
                 'success' => false,
@@ -90,7 +84,6 @@ class AuthController extends Controller
 
     public function forgotPassword(Request $request)
 {
-    // Validasi email
     $validator = Validator::make($request->all(), [
         'email' => 'required|email|exists:users,email',
     ]);
@@ -99,16 +92,13 @@ class AuthController extends Controller
         return response()->json(['error' => $validator->errors()], 422);
     }
 
-    // Ambil user
     $user = User::where('email', $request->email)->first();
 
-    // Set OTP
     $otp = rand(100000, 999999);
     $user->otp_code = $otp;
     $user->otp_expires_at = now()->addMinutes(15);
     $user->save();
 
-    // Kirim OTP ke email
     Mail::raw("Kode OTP Anda adalah: $otp", function ($message) use ($user) {
         $message->to($user->email)
                 ->subject('Reset Password OTP');
@@ -119,7 +109,6 @@ class AuthController extends Controller
 
 public function updatePassword(Request $request)
 {
-    // Validasi input
     $validator = Validator::make($request->all(), [
         'otp' => 'required|numeric',
         'password' => 'required|string|min:6',
@@ -129,15 +118,12 @@ public function updatePassword(Request $request)
         return response()->json(['error' => $validator->errors()], 422);
     }
 
-    // Cari user
     $user = User::where('otp_code', $request->otp)->first();
 
-    // Verifikasi OTP dan waktu kedaluwarsa
     if (now()->gt($user->otp_expires_at)) {
         return response()->json(['error' => __('messageApi.OTP is invalid or expired')], 403);
     }
 
-    // Update password
     $user->password = Hash::make($request->password);
     $user->otp_code = null;
     $user->otp_expires_at = null;
@@ -177,21 +163,17 @@ public function updatePassword(Request $request)
 
     public function login(Request $request): JsonResponse
     {
-        // Validate the login input
         $validator = Validator::make($request->all(), [
             'email' => 'required|email|max:128',
             'password' => 'required|min:6|max:28',
         ]);
 
-        // If validation fails
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        // Find user by email
         $user = User::where('email', $request->email)->first();
         // Dd($user);
-        // Check credentials
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json(
                 [
@@ -202,7 +184,6 @@ public function updatePassword(Request $request)
             );
         }
 
-        // Periksa apakah email sudah diverifikasi
         if (!$user->email_verified_at) {
         $otp = rand(100000, 999999);
         $user->update(['otp_code' => $otp,'otp_expires_at' => Carbon::now()->addMinutes(15)]);
@@ -216,7 +197,6 @@ public function updatePassword(Request $request)
             );
         }
 
-        // Create token for the user
         $token = $user->createToken('ApiToken')->plainTextToken;
 
         return response()->json(
@@ -231,7 +211,6 @@ public function updatePassword(Request $request)
 
     public function update(Request $request)
     {
-        // Pastikan user sudah terautentikasi
         $user = $request->user();
         if (!$user) {
             return response()->json(
@@ -243,11 +222,9 @@ public function updatePassword(Request $request)
             );
         }
 
-        // Cek apakah email sudah ada di database dan digunakan oleh pengguna lain
         if ($request->has('email')) {
             $existingEmail = User::where('email', $request->email)->first();
 
-            // Jika email sudah digunakan oleh pengguna lain yang bukan diri kita sendiri
             if ($existingEmail && $existingEmail->id != $user->id) {
                 return response()->json(
                     [
@@ -258,7 +235,6 @@ public function updatePassword(Request $request)
                 );
             }
 
-            // Jika email yang dimasukkan sama dengan email pengguna yang sedang login
             if ($existingEmail && $existingEmail->id == $user->id) {
                 return response()->json(
                     [
@@ -270,7 +246,6 @@ public function updatePassword(Request $request)
             }
         }
 
-        // Validasi input yang diterima dari request
         $validated = $request->validate([
             'name' => 'nullable|string|max:255',
             'email' => 'nullable|email|unique:users,email,' . $user->id,
@@ -279,10 +254,9 @@ public function updatePassword(Request $request)
             'phone_number' => 'nullable|numeric|min:10',
         ]);
 
-        // Jika ada data yang perlu diupdate
         if ($validated) {
             if ($user->email != $request->email) {
-                $otp = rand(100000, 999999); // 6 digit kode OTP
+                $otp = rand(100000, 999999);
                 $validated['otp_code'] = $otp;
                 $validated['otp_expires_at'] = Carbon::now()->addMinutes(15);
                 $validated['email_verified_at'] = null;
@@ -300,13 +274,11 @@ public function updatePassword(Request $request)
                 [
                     'success' => true,
                     'message' => __('messageApi.update success'),
-                    'data' => $user,
                 ],
                 200,
             );
         }
 
-        // Jika validasi gagal
         return response()->json(
             [
                 'success' => false,
@@ -318,7 +290,6 @@ public function updatePassword(Request $request)
 
     public function logout()
     {
-        // Pastikan user sudah terautentikasi
         $user = Auth::user();
         if (!$user) {
             return response()->json(
@@ -330,7 +301,6 @@ public function updatePassword(Request $request)
             );
         }
 
-        // Revoke all tokens dari user
         $user->tokens->each(function ($token) {
             $token->delete();
         });
@@ -341,10 +311,8 @@ public function updatePassword(Request $request)
         ]);
     }
 
-    // Method untuk mengambil data pengguna yang sedang login
     public function me(Request $request)
     {
-        // Mengambil data pengguna yang sedang login
         $user = $request->user();
 
         return response()->json($user);

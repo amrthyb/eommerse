@@ -20,10 +20,10 @@ class Order extends Model
     }
 
     // Relasi dengan model OrderItem
-    public function Items()
-    {
-        return $this->hasMany(OrderItem::class);
-    }
+        public function orderItems()
+        {
+            return $this->hasMany(OrderItem::class);
+        }
 
     // Relasi ke tabel payment
     public function payment()

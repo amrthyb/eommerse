@@ -11,7 +11,7 @@
     <h4>{{ __('order.Order Items') }}</h4>
 
     <!-- Pengecekan untuk memastikan items ada -->
-    @if($order->items->isNotEmpty())
+    @if($order->orderitems->isNotEmpty())
         <table id="table" class="table table-striped" style="width:100%">
             <thead>
                 <tr>
@@ -21,7 +21,7 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach($order->items as $item)
+                @foreach($order->orderitems as $item)
                 <tr>
                     <td>{{ $item->product->name }}</td>
                     <td>{{ $item->quantity }}</td>

@@ -19,10 +19,10 @@
                     <tr>
                         <td>{{ $user->id }}</td>
                         <td>{{ $user->name }}</td>
-                        <td>{{ $user->email }}</td>
+                        <td>{{ $user->email }}  </td>
                         <td>
                             @if(in_array('pengguna.lihat', Auth::user()->roles->permissions ?? []))
-                            <a href="{{ route('users.show', $user->id) }}" class="btn btn-info">View</a>
+                            <a href="{{ route('users.show', ['id' => $user->id]) }}" class="btn btn-info">View</a>
                             @endif
                         </td>
                     </tr>

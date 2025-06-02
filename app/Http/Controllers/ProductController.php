@@ -39,28 +39,25 @@ class ProductController extends Controller
     }
 
     public function store(Request $request)
-{
-    // Validasi data input
-    $request->validate([
-        'name' => 'required|max:225',
-        'description' => 'required|max:225',
-        'price' => 'required|numeric',
-        'stock' => 'required|integer',
-        'category_id' => 'required|exists:categories,id',
-        'images' => 'nullable|array',
-        'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+    {
+        $request->validate([
+            'name' => 'required|max:225',
+            'description' => 'required|max:225',
+            'price' => 'required|numeric',
+            'stock' => 'required|integer',
+            'category_id' => 'required|exists:categories,id',
+            'images' => 'nullable|array',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
     ]);
 
-    // Menyimpan data produk
-    $product = Product::create([
-        'name' => $request->name,
-        'description' => $request->description,
-        'price' => $request->price,
-        'stock' => $request->stock,
-        'category_id' => $request->category_id,
+        $product = Product::create([
+            'name' => $request->name,
+            'description' => $request->description,
+            'price' => $request->price,
+            'stock' => $request->stock,
+            'category_id' => $request->category_id,
     ]);
 
-    // Menyimpan gambar baru jika ada
     if ($request->hasFile('images')) {
         foreach ($request->file('images') as $image) {
             $imagePath = $image->store('product_images', 'public');
@@ -71,13 +68,12 @@ class ProductController extends Controller
         }
     }
 
-       // Mengirim notifikasi ke semua admin
        $users = User::where('role', 'user')->get();
        foreach ($users as $user) {
             sleep(2);
-           $user->notify(new NewProduct($product)); // Kirim notifikasi ke admin
+           $user->notify(new NewProduct($product));
        }
-        // Redirect ke halaman index produk dengan pesan sukses
+
         return redirect()->route('products.index')->with('success', 'Produk berhasil dibuat!');
     }
 
@@ -91,7 +87,6 @@ class ProductController extends Controller
 
     public function update(Request $request, $id)
     {
-        // Validasi data input
         $request->validate([
             'name' => 'required|max:225',
             'description' => 'required|max:225',
@@ -102,10 +97,8 @@ class ProductController extends Controller
             'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
-        // Cari produk berdasarkan ID
         $product = Product::findOrFail($id);
 
-        // Update produk dengan data baru
         $product->update([
             'name' => $request->name,
             'description' => $request->description,
@@ -114,9 +107,7 @@ class ProductController extends Controller
             'category_id' => $request->category_id,
         ]);
 
-        // Menyimpan gambar baru
         if ($request->hasFile('images')) {
-            // Menghapus gambar lama
             if ($product->images->isNotEmpty()) {
                 foreach ($product->images as $image) {
                     Storage::delete('public/' . $image->image_url);
@@ -124,7 +115,6 @@ class ProductController extends Controller
                 }
             }
 
-            // Menyimpan gambar baru
             foreach ($request->file('images') as $image) {
                 $imagePath = $image->store('product_images', 'public');
                 ProductImage::create([
@@ -134,16 +124,13 @@ class ProductController extends Controller
             }
         }
 
-        // Redirect kembali ke halaman index dengan pesan sukses
         return redirect()->route('products.index')->with('success', 'Produk berhasil diperbarui!');
     }
 
     public function destroy($id)
     {
-        // Find the product by ID
         $product = Product::findOrFail($id);
 
-        // Delete associated images from storage (if any)
         if ($product->images->isNotEmpty()) {
             foreach ($product->images as $image) {
                 Storage::delete('public/' . $image->image_url);
@@ -151,28 +138,29 @@ class ProductController extends Controller
             }
         }
 
-        // Delete the product itself
         $product->delete();
 
-        // Redirect back to the product index page with a success message
         return redirect()->route('products.index')->with('success', 'Produk berhasil dihapus!');
     }
-    // Method untuk mengekspor produk
+
     public function export()
     {
-        return Excel::download(new ProductExport, 'products.xlsx');  // Ekspor data ke file Excel
+        return Excel::download(new ProductExport, 'products.xlsx');
     }
 
-    // Method untuk mengimpor produk
     public function import(Request $request)
     {
         $request->validate([
-            'file' => 'required|mimes:xlsx,xls',  // Validasi file yang diupload
+            'file' => 'required|mimes:xlsx,xls',
         ]);
 
-        Excel::import(new ProductImport, $request->file('file'));  // Import data dari file Excel
-
-        return redirect()->route('products.index')->with('success', 'Produk berhasil diimpor!');
+        try{
+            Excel::import(new ProductImport, $request->file('file'));
+            return redirect()->route('products.index')->with('success', 'Produk berhasil diimpor!');
+        }catch (\Exception $e){
+            \Log::error('Gagal import produk: '. $e->getMessage());
+            return redirect()->route('products.index')->with('error', 'Gagal mengimport produk. Pastikan file sesuai format.');
+        }
     }
 
 }

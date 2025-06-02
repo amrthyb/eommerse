@@ -12,7 +12,7 @@ class OrderExport implements FromCollection, WithHeadings, WithMapping
     public function collection()
     {
         // Ambil data pesanan yang sudah ada
-        return Order::with('user', 'items.product')->get();
+        return Order::with('user', 'orderItems.product')->get();
     }
 
     public function headings(): array
@@ -30,7 +30,7 @@ class OrderExport implements FromCollection, WithHeadings, WithMapping
     public function map($order): array
     {
         // Menyusun data untuk setiap baris
-        $items = $order->items->map(function ($item) {
+        $items = $order->orderItems->map(function ($item) {
             return $item->product->name . ' (' . $item->quantity . ')';
         })->implode(', ');
 

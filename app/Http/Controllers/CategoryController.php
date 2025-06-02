@@ -23,7 +23,6 @@ class CategoryController extends Controller
     }
     public function index()
     {
-        // $query dari db
         $categories = Category::orderBy('id', 'asc')->get();
         return view('admin.categories.index', ['categories' => $categories]);
     }
@@ -35,24 +34,19 @@ class CategoryController extends Controller
 
     public function store(Request $request)
     {
-        //validate form
         $this->validate($request, [
             'name' => 'required|max:225',
             'description' => 'required|max:225',
             // 'status'     => 'required|max:225',
         ]);
         // dd($request->all());
-        //create post
         Category::create([
             'name' => $request->name,
             'description' => $request->description,
             // 'status'   => 'active',
         ]);
 
-        //redirect to index
-        return redirect()
-            ->route('categories.index')
-            ->with(['success' => 'Data Berhasil Disimpan!']);
+        return redirect()->route('categories.index')->with(['success' => 'Data Berhasil Disimpan!']);
     }
 
     public function edit($id)
@@ -63,14 +57,12 @@ class CategoryController extends Controller
 
     public function update(Request $request, $id)
     {
-        // Validasi input
         $this->validate($request, [
             'name' => 'required|max:225',
             'description' => 'required|max:225',
             // 'status' => 'required|max:225',
         ]);
 
-        // Menemukan dan update kategori berdasarkan ID
         $category = Category::findOrFail($id);
         $category->update([
             'name' => $request->name,
@@ -78,10 +70,7 @@ class CategoryController extends Controller
             // 'status' => 'active',
         ]);
 
-        // Redirect ke halaman index dengan pesan sukses
-        return redirect()
-            ->route('categories.index')
-            ->with(['success' => 'Data Berhasil Diubah!']);
+        return redirect()->route('categories.index')->with(['success' => 'Data Berhasil Diubah!']);
     }
 
     public function destroy($id)
@@ -96,7 +85,6 @@ class CategoryController extends Controller
         return redirect()->route('categories.index')->with('error', 'Category not found.');
     }
 
-    // Import Categories
     public function import(Request $request)
     {
         $this->validate($request, [
@@ -105,14 +93,10 @@ class CategoryController extends Controller
 
         try {
             Excel::import(new CategoryImport(), $request->file('file'));
-
-            return redirect()
-                ->route('categories.index')
-                ->with(['success' => 'Data Berhasil Diimport!']);
+            return redirect()->route('categories.index')->with(['success' => 'Data Berhasil Diimport!']);
         } catch (\Exception $e) {
-            return redirect()
-                ->route('categories.index')
-                ->with(['error' => 'Data Gagal Diimport! ' . $e->getMessage()]);
+            \Log::error('Gagal import produk: '. $e->getMessage());
+            return redirect()->route('categories.index')->with('error', 'Gagal import produk. Pastikan data sesuai format');
         }
     }
 

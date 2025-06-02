@@ -10,11 +10,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Notifications\DatabaseNotification;
 class NotificationController extends Controller
     {
-        // Menampilkan semua notifikasi milik user yang login
         public function index(Request $request)
         {
             $user = $request->user();
-            // Ambil hanya notifikasi produk baru & status order
             $notifications = $user->notifications()
                 ->whereIn('type', [
                     NewProduct::class,
@@ -24,8 +22,7 @@ class NotificationController extends Controller
                 ->latest()
                 ->get();
 
-            // Format responsenya supaya rapi
-            $data = $notifications->map(function ($notification) {
+                $data = $notifications->map(function ($notification) {
                 $type = class_basename($notification->type);
 
                 return [

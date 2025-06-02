@@ -45,4 +45,4 @@ Route::middleware('auth:sanctum', 'verified')->group(function () {
 
 });
 
-
+Route::post('/midtrans/callback', [OrderController::class, 'handleCallback']);
