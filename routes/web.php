@@ -26,7 +26,6 @@ Route::get('/', function () {
     return redirect('/login');
 });
 
-
 Route::get('/register', [AuthenticationController::class, 'registerForm'])->name('registerForm');
 Route::post('/register', [AuthenticationController::class, 'register'])->name('register');
 Route::get('/login', [AuthenticationController::class, 'loginForm'])->name('login');
@@ -81,6 +80,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 });
 
+Route::post('/logout', [AuthenticationController::class, 'logout'])->name('logout');
+
 Route::get('/greeting/{locale}', function (string $locale) {
     if (! in_array($locale, ['en', 'id'])) {
         abort(400);
@@ -89,7 +90,6 @@ Route::get('/greeting/{locale}', function (string $locale) {
     session()->put('locale', $locale);
     return back();
 })->name('set.language');
-Route::post('/logout', [AuthenticationController::class, 'logout'])->name('logout');
 
 //verifikasi
 Route::get('/email/verify', function () {

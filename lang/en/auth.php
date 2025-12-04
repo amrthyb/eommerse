@@ -21,6 +21,6 @@ return [
     'confirm password' => 'Confirm Password',
     'address' => 'Address',
     'phone number' => 'Phone Number',
-    'email' => 'Email', 
-
+    'email' => 'Email',
+    'leave blank if not change password' => 'leave blank if not change password' ,
 ];

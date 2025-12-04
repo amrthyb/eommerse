@@ -19,7 +19,7 @@ class RolesController extends Controller
     }
     public function index()
     {
-        $roles = Role::all();
+        $roles = Role::where('id','!=',auth()->user()->role_id)->get();
         return view('admin.roles.index', compact('roles'));
     }
 

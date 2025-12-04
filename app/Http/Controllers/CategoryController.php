@@ -21,6 +21,7 @@ class CategoryController extends Controller
         $this->middleware('permission:kategori.hapus')->only(['destroy']);
         $this->middleware('permission:kategori')->only(['index']);
     }
+    
     public function index()
     {
         $categories = Category::orderBy('id', 'asc')->get();
@@ -37,13 +38,11 @@ class CategoryController extends Controller
         $this->validate($request, [
             'name' => 'required|max:225',
             'description' => 'required|max:225',
-            // 'status'     => 'required|max:225',
         ]);
         // dd($request->all());
         Category::create([
             'name' => $request->name,
             'description' => $request->description,
-            // 'status'   => 'active',
         ]);
 
         return redirect()->route('categories.index')->with(['success' => 'Data Berhasil Disimpan!']);
@@ -60,14 +59,12 @@ class CategoryController extends Controller
         $this->validate($request, [
             'name' => 'required|max:225',
             'description' => 'required|max:225',
-            // 'status' => 'required|max:225',
         ]);
 
         $category = Category::findOrFail($id);
         $category->update([
             'name' => $request->name,
             'description' => $request->description,
-            // 'status' => 'active',
         ]);
 
         return redirect()->route('categories.index')->with(['success' => 'Data Berhasil Diubah!']);

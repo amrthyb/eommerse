@@ -22,5 +22,5 @@ return [
     'address' => 'Alamat',
     'phone number' => 'Nomor HP',
     'email' => 'Email',
-
+    'leave blank if not change password'=> 'biarkan kosong jika tidak ganti kata sandi',
 ];

@@ -19,7 +19,6 @@
         </div>
     @endif
 
-    <!-- Pemeriksaan apakah user sedang login -->
     @if (auth()->check())
         <form action="{{ route('update-account') }}" method="POST">
             @csrf
@@ -40,7 +39,7 @@
             <div class="form-group">
                 <label for="password">{{ __('auth.password') }}</label>
                 <input type="password" name="password" class="form-control">
-                <small class="form-text text-muted">{{ __('auth.leave_blank_if_not_change_password') }}</small>
+                <small class="form-text text-muted">{{ __('auth.leave blank if not change password') }}</small>
             </div>
 
             <!-- Konfirmasi Password -->

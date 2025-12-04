@@ -19,9 +19,7 @@ Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 Route::post('/update-password', [AuthController::class, 'updatePassword']);
 
 Route::get('/products', [ProductsController::class, 'index']);
-// Route::middleware('auth:api')->get('/user', function (Request $request) {
-    //     return $request->user();
-    // });
+
 Route::middleware('auth:sanctum', 'verified')->group(function () {
     Route::put('/update', [AuthController::class, 'update']);
     Route::post('/logout', [AuthController::class, 'logout']);
@@ -35,13 +33,12 @@ Route::middleware('auth:sanctum', 'verified')->group(function () {
 
     // Fitur Checkout
     Route::post('/checkout', [OrderController::class, 'checkout']);
-    // Route::get('/orders', [OrderController::class, 'getOrders']);
+    Route::get('/orders', [OrderController::class, 'getOrders']);
 
     // Rute untuk notifikasi
     Route::get('/notifications', [NotificationController::class, 'index']);
     Route::put('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
     Route::delete('/notifications/{id}', [NotificationController::class, 'destroy']);
-
 
 });
 

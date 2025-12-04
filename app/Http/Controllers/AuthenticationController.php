@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Role;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Support\Facades\Auth;
@@ -31,14 +32,16 @@ class AuthenticationController extends Controller
             'address' => 'required|string|max:255',
             'phone_number' => 'required|numeric|min:10',
         ]);
+        $role = Role::where('name','admin')->first();
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => 'admin',
+            'role' => $role->name,
             'address' => $request->address,
             'phone_number' => $request->phone_number,
+            'role_id' => $role->id
         ]);
         // event(new Registered($user));
 

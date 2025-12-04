@@ -21,7 +21,7 @@
             @forelse($orders as $order) <!-- Pastikan menggunakan $orders -->
             <tr>
                 <td>{{ $order->id }}</td>
-                <td>Rp {{ number_format($order->total_price, 0, ',', '.') }}</td>
+                <td>Rp {{ number_format($order->total_amount, 0, ',', '.') }}</td>
                 <td>{{ ucfirst($order->status) }}</td>
                 <td>{{ $order->created_at }}</td>
             </tr>

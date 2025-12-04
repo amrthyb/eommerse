@@ -29,7 +29,7 @@ class ProductController extends Controller
     public function index()
     {
         $products = Product::OrderBy('id','desc')->get();
-        return view('admin.products.index', compact('products'));
+        return view('admin.products.index', ['products' => $products]);
     }
 
     public function create()
@@ -74,7 +74,7 @@ class ProductController extends Controller
            $user->notify(new NewProduct($product));
        }
 
-        return redirect()->route('products.index')->with('success', 'Produk berhasil dibuat!');
+        return redirect()->route('products.index')->with(['success' => 'Produk berhasil dibuat!']);
     }
 
     public function edit($id)
@@ -124,7 +124,7 @@ class ProductController extends Controller
             }
         }
 
-        return redirect()->route('products.index')->with('success', 'Produk berhasil diperbarui!');
+        return redirect()->route('products.index')->with(['success'=> 'Produk berhasil diperbarui!']);
     }
 
     public function destroy($id)
@@ -140,7 +140,7 @@ class ProductController extends Controller
 
         $product->delete();
 
-        return redirect()->route('products.index')->with('success', 'Produk berhasil dihapus!');
+        return redirect()->route('products.index')->with(['success'=>'Produk berhasil dihapus!']);
     }
 
     public function export()
@@ -156,10 +156,10 @@ class ProductController extends Controller
 
         try{
             Excel::import(new ProductImport, $request->file('file'));
-            return redirect()->route('products.index')->with('success', 'Produk berhasil diimpor!');
+            return redirect()->route('products.index')->with(['success'=>'Produk berhasil diimpor!']);
         }catch (\Exception $e){
             \Log::error('Gagal import produk: '. $e->getMessage());
-            return redirect()->route('products.index')->with('error', 'Gagal mengimport produk. Pastikan file sesuai format.');
+            return redirect()->route('products.index')->with(['error'=> 'Gagal mengimport produk. Pastikan file sesuai format.']);
         }
     }
 

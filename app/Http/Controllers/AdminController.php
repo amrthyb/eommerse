@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Middleware\AdminRole;
 use App\Models\Role;
 use Illuminate\Http\Request;
 use App\Models\User;
+use Illuminate\Foundation\Auth\User as AuthUser;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
@@ -22,10 +24,12 @@ class AdminController extends Controller
 
     public function index()
     {
+        $userId = Auth::id();
         $admins = DB::table('users')
         ->select('users.id', 'users.name', 'users.email', 'roles.name as role_name')
         ->leftJoin('roles', 'users.role_id', '=', 'roles.id')
         ->where('users.role', 'admin')
+        ->where('users.id', '!=', $userId)
         ->orderBy('users.id', 'desc')
         ->get();
 

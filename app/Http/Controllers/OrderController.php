@@ -32,8 +32,7 @@ class OrderController extends Controller
     public function show($id)
     {
         // Ambil pesanan berdasarkan ID
-        $order = Order::with('orderitems')
-                    ->findOrFail($id);
+        $order = Order::with('orderitems')->findOrFail($id);
 
         return view('admin.orders.show', compact('order'));
     }
